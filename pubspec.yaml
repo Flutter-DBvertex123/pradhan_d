@@ -1,0 +1,109 @@
+name: chunaw
+description: A new Flutter project.
+
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.41+42
+
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  adaptive_action_sheet: ^2.0.2
+  cached_network_image: ^3.2.3
+  chewie: ^1.7.4
+  cloud_firestore: ^5.6.3
+  country_picker: ^2.0.20
+  cupertino_icons: ^1.0.2
+  dotted_border: ^2.0.0+3
+  expandable: ^5.0.1
+  firebase_auth: ^5.4.2
+  firebase_core: ^3.11.0
+  firebase_messaging: ^15.2.2
+  firebase_storage: ^12.4.2
+  flutter:
+    sdk: flutter
+  flutter_animate: ^4.3.0
+  flutter_linkify: ^6.0.0
+  flutter_local_notifications: ^17.2.4
+  flutter_screenutil: ^5.6.0
+  flutter_svg: ^2.0.7
+  fluttertoast: ^8.2.12
+  gal: ^2.3.0
+  get: ^4.6.5
+  google_sign_in: ^6.1.4
+  http: ^1.2.0
+  image_cropper: ^9.1.0
+  image_picker: ^1.0.4
+  like_button: ^2.0.5
+  lottie: ^2.2.0
+  mime: ^1.0.4
+  path_provider: ^2.1.2
+  pin_code_fields: ^8.0.1
+  screenshot: ^3.0.0
+  share_plus: ^7.2.1
+  shared_preferences: ^2.0.15
+  shimmer: ^3.0.0
+  smooth_page_indicator: ^1.1.0
+  timeago: ^3.3.0
+  url_launcher: ^6.2.1
+  uuid: ^4.4.0
+  video_player: ^2.7.2
+  visibility_detector: ^0.4.0+2
+
+  razorpay_flutter: ^1.4.0
+  intl: ^0.17.0
+  cloud_functions: ^5.3.2
+  calendar_appbar: ^0.0.6
+
+  on_audio_query: ^2.9.0
+  record: ^5.2.0
+  just_audio: ^0.9.42
+  ffmpeg_kit_flutter_new: ^2.0.0
+
+  permission_handler: ^11.3.1
+#  firebase_dynamic_links: ^6.1.5
+#  firebase_analytics: ^11.4.5
+#  videfluo_trimmer: ^0.6.0
+
+dev_dependencies:
+  flutter_launcher_icons: ^0.13.1
+  flutter_lints: ^2.0.0
+  flutter_test:
+    sdk: flutter
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+# The following section is specific to Flutter packages.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/
+    - assets/parties/
+
+  fonts:
+    - family: MonoType
+      fonts:
+        - asset: assets/fonts/monotype_font.ttf
+
+# flutter launcher icons
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/logo.jpeg"
+  web:
+    generate: false
+  windows:
+    generate: false
+  macos:
+    generate: false
+
+

@@ -1,0 +1,86 @@
+{
+  "project_info": {
+    "project_number": "379389559599",
+    "project_id": "chunaw-a66df",
+    "storage_bucket": "chunaw-a66df.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:379389559599:android:20b3bb68ff6ecdb39d17da",
+        "android_client_info": {
+          "package_name": "com.ioninks.pradhaan"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "379389559599-2nfkto49n1squ4779v8d3k2p1lbqi7bv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ioninks.pradhaan",
+            "certificate_hash": "83e442bc13291453e7f4f678d32e2cea811ec29f"
+          }
+        },
+        {
+          "client_id": "379389559599-6d1qo3endq670udfnagj5568m3ns20ur.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ioninks.pradhaan",
+            "certificate_hash": "9bade9e7e906b2411a5cbc3a23b773b5ebafcae7"
+          }
+        },
+        {
+          "client_id": "379389559599-7q76fc8fv0gln72m78s479ap510c8c2v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ioninks.pradhaan",
+            "certificate_hash": "d06f44b3cf5f3f5b54c000206908185fa8813357"
+          }
+        },
+        {
+          "client_id": "379389559599-f0028rfvhgt0pn8lijdhtqn8surdl9mk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ioninks.pradhaan",
+            "certificate_hash": "8b869a6df2c37d9a1ee9e3d31d9227b87664f370"
+          }
+        },
+        {
+          "client_id": "379389559599-gfb93l9c57rhmudai01bhnaen32mjmlv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ioninks.pradhaan",
+            "certificate_hash": "638e76a32edb10ba59c70c6ee4d2dac446fa4939"
+          }
+        },
+        {
+          "client_id": "379389559599-m7co5aa1rrg9dn36h5mqgn0g9ubon41k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBytuSUN6383FDoewrZ7D6Vzo6_bKGJ3Gk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "379389559599-fqutk4c390embh8skmuj6m8p73k83tq2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "379389559599-dd2r039kekbrbqde61km8vkrc7v656mm.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ioninks.chunaw"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
