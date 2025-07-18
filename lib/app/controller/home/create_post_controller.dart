@@ -282,6 +282,7 @@ class CreatePostController extends GetxController {
     if (selectedVideo.value != '' && selectedVideo.value.startsWith('http')) {
       finalVideoLink = selectedVideo.value;
     } else if (selectedVideo.value != '') {
+
       if (selectedAudio.value == null || selectedAudio.value?.startsWith('http') == true) {
         finalVideoLink = await uploadFile(File(selectedVideo.value), fileNumber: i++);
       } else {
@@ -698,8 +699,24 @@ class CreatePostController extends GetxController {
 
       // resetting the images
       selectedImages.value = [];
+      if(video != null  ){
+        debugPrint('ds : - In the Video Size Ckeck');
+        int sizeInBytes = await video.length();
+        double sizeInMB = sizeInBytes / (1024 * 1024);
+        if(sizeInMB >= 50){
+          debugPrint('ds : - Video Size is too long $sizeInMB');
+          longToastMessage('Video File Is Too Large');
+        }else{
+          selectedVideo.value = video.path;
+        }
+      }
+      else{
+        // selectedVideo.value = video == null ? '' : video.path;
+        selectedVideo.value = '';
+      }
 
-      selectedVideo.value = video == null ? '' : video.path;
+
+
     } catch (e) {
       print("ishwar: yash; error on get video from camera: $e");
     }
@@ -729,7 +746,22 @@ class CreatePostController extends GetxController {
 
     // resetting the images
     selectedImages.value = [];
-    selectedVideo.value = video == null ? '' : video.path;
+    if(video != null  ){
+      debugPrint('ds : - In the Video Size Ckeck');
+      int sizeInBytes = await video.length();
+      double sizeInMB = sizeInBytes / (1024 * 1024);
+      if(sizeInMB >= 50){
+       debugPrint('ds : - Video Size is too long $sizeInMB');
+       longToastMessage('Video File Is Too Large');
+      }else{
+        selectedVideo.value = video.path;
+      }
+    }
+    else{
+     // selectedVideo.value = video == null ? '' : video.path;
+      selectedVideo.value = '';
+    }
+
   }
 
   Future<void> cropView(var image) async {
