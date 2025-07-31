@@ -42,7 +42,6 @@ class _PradhanStatusCardState extends State<PradhanStatusCard> {
       final isCurrentUserPradhaan =
           welcomeController.pradhanId.value.isNotEmpty &&
               welcomeController.pradhanId.value == getPrefValue(Keys.USERID);
-
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
         child: Container(

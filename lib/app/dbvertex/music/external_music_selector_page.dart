@@ -1,6 +1,5 @@
 
 import 'package:chunaw/app/widgets/app_toast.dart';
-import 'package:ffmpeg_kit_flutter_new/ffprobe_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';

@@ -63,9 +63,11 @@ class AppRoutes {
     );
   }
 
-  static navigateToAddPost({PostModel? existingPost, String? organizationId}) async {
+  static navigateToAddPost(
+      {PostModel? existingPost, String? organizationId}) async {
     // return await Get.to(() => AddPostScreen(existingPost: existingPost, organizationId: organizationId));
-    return await Get.to(() => CreatePostScreen(postModel: existingPost, organizationId: organizationId));
+    return await Get.to(() => CreatePostScreen(
+        postModel: existingPost, organizationId: organizationId));
   }
 
   static Future<bool> navigateToWelcomePage(String name, String locationId,
@@ -101,18 +103,19 @@ class AppRoutes {
     Get.offAll(() => HomeTabScreen());
   }
 
-  static navigateToDownloadPradhaanCard({
-    required String fundsRaised,
-    required String autoFund,
-    required String imageUrl,
-    required bool isPradhaanAtHisLevel,
-    required String name,
-    required String userLevelLocation,
-    required String votesReceived,
-  }) {
+  static navigateToDownloadPradhaanCard(
+      {required String fundsRaised,
+      required String autoFund,
+      required String imageUrl,
+      required bool isPradhaanAtHisLevel,
+      required String name,
+      required String userLevelLocation,
+      required String votesReceived,
+      required String designation}) {
     Get.to(() => DownloadPradhaanCardScreen(
+          designation: designation,
           fundsRaised: fundsRaised,
-      autoFund: autoFund,
+          autoFund: autoFund,
           imageUrl: imageUrl,
           isPradhaanAtHisLevel: isPradhaanAtHisLevel,
           name: name,
@@ -121,7 +124,10 @@ class AppRoutes {
         ));
   }
 
-  static navigateToMyProfile({required String userId, required bool isOrganization, required bool back}) {
+  static navigateToMyProfile(
+      {required String userId,
+      required bool isOrganization,
+      required bool back}) {
     if (isOrganization) {
       Get.to(() => OrganisationDetailsScreen(organisationId: userId));
     } else {

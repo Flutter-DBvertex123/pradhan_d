@@ -53,17 +53,18 @@ dependencies:
   url_launcher: ^6.2.1
   uuid: ^4.4.0
   video_player: ^2.7.2
+  #video_trimmer: ^2.0.0
   visibility_detector: ^0.4.0+2
 
   razorpay_flutter: ^1.4.0
   intl: ^0.17.0
   cloud_functions: ^5.3.2
   calendar_appbar: ^0.0.6
-
-  on_audio_query: ^2.9.0
-  record: ^5.2.0
-  just_audio: ^0.9.42
   ffmpeg_kit_flutter_new: ^2.0.0
+  on_audio_query: ^2.9.0
+  record: ^6.0.0
+  just_audio: ^0.9.42
+  video_compress: ^3.1.0
 
   permission_handler: ^11.3.1
 
@@ -108,4 +109,7 @@ flutter_launcher_icons:
   macos:
     generate: false
 
+  #dependency_overrides:
+    #ffmpeg_kit_flutter:
+    #path: plugins/ffmpeg_kit_flutter-5.1.0
 

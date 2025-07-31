@@ -6,6 +6,7 @@ import 'dart:math';
 import 'package:adaptive_action_sheet/adaptive_action_sheet.dart';
 import 'package:chewie/chewie.dart';
 import 'package:chunaw/app/dbvertex/music/recorder_dialog.dart';
+import 'package:chunaw/app/dbvertex/utils/video_compresser.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit_config.dart';
@@ -31,6 +32,7 @@ import '../../service/collection_name.dart';
 import '../../service/post_service.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_pref.dart';
+import '../../utils/app_routes.dart';
 import '../../utils/token_generator.dart';
 import '../../widgets/app_toast.dart';
 
@@ -57,7 +59,8 @@ class CreatePostController extends GetxController {
   String? getMediaSummary() {
     if (selectedVideo.value.isNotEmpty) {
       return selectedVideo.value.split('/').lastOrNull;
-    } else if (selectedImages.value.isNotEmpty && selectedImages.value.length == 1) {
+    } else if (selectedImages.value.isNotEmpty &&
+        selectedImages.value.length == 1) {
       return selectedImages.value.first.split('/').lastOrNull;
     } else if (selectedImages.value.isNotEmpty) {
       return '${selectedImages.value.length} images';
@@ -87,7 +90,8 @@ class CreatePostController extends GetxController {
         availableLevels.addAll(["Postal Level", "City Level", "State Level"]);
         break;
       case "4":
-        availableLevels.addAll(["Postal Level", "City Level", "State Level", "Country Level"]);
+        availableLevels.addAll(
+            ["Postal Level", "City Level", "State Level", "Country Level"]);
         break;
       default:
         availableLevels.addAll(["Postal Level"]);
@@ -107,7 +111,8 @@ class CreatePostController extends GetxController {
       final newText = text.replaceRange(selection.start, selection.end, keyStr);
       captionTextController.value = TextEditingValue(
         text: newText,
-        selection: TextSelection.collapsed(offset: selection.start + keyStr.length),
+        selection:
+            TextSelection.collapsed(offset: selection.start + keyStr.length),
       );
     }
   }
@@ -120,11 +125,94 @@ class CreatePostController extends GetxController {
     }
   }
 
+  //Camera Actions
+  Future<void> videoAction(BuildContext context) async {
+    await showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        bool isLoading = false;
+        return StatefulBuilder(
+          builder: (context, setState) {
+            Future<void> handleSelection(Future<void> Function() action) async {
+              setState(() => isLoading = true);
+              await action();
+              Navigator.of(context).pop(); // Close after processing
+            }
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 26),
+              child: isLoading
+                  ? Container(
+                height: 250,
+                      alignment: Alignment.center,
+                      width: double.maxFinite,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children:  [
+                          CircularProgressIndicator(
+                            color: AppColors.primaryColor,
+                          ),
+                          SizedBox(height: 30),
+                          Text("Processing, please wait...",style: TextStyle(fontSize: 20,),),
+                        ],
+                      ),
+                    )
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          "Select Option",
+                          style: TextStyle(
+                              fontSize: 25, fontWeight: FontWeight.w600),
+                        ),
+                        ListTile(
+                          title: Text(
+                            "Camera",
+                            style: TextStyle(
+                                color: AppColors.gradient2, fontSize: 22),
+                            textAlign: TextAlign.center,
+                          ),
+                          onTap: () => handleSelection(
+                              () => getVideoFromCamera(context)),
+                        ),
+                        ListTile(
+                          title: Text(
+                            "Gallery",
+                            style: TextStyle(
+                                color: AppColors.gradient2, fontSize: 22),
+                            textAlign: TextAlign.center,
+                          ),
+                          onTap: () => handleSelection(
+                              () => getVideoFromGallery(context)),
+                        ),
+                        ListTile(
+                          title: const Text(
+                            "Cancel",
+                            style: TextStyle(fontSize: 22, color: Colors.blue),
+                            textAlign: TextAlign.center,
+                          ),
+                          onTap: () => Navigator.of(context).pop(),
+                        ),
+                      ],
+                    ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   Future<void> recordBackgroundVoice() async {
     final file = await RecorderDialog.show();
     if (file is File) {
       audioType = 'record';
-      logs.add('Audio record [path: ${file.uri.path} | exists?: ${file.existsSync()}]');
+      logs.add(
+          'Audio record [path: ${file.uri.path} | exists?: ${file.existsSync()}]');
       selectedAudio.value = file.path;
     }
   }
@@ -138,12 +226,12 @@ class CreatePostController extends GetxController {
     super.onClose();
   }
 
-
   String _formatDuration(Duration duration) {
     return '${duration.inMinutes.toString().padLeft(2, '0')}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
   }
 
-  Future<bool> _mergeAudioAndVideo(String videoPath, String audioPath, String outputPath) async {
+  Future<bool> _mergeAudioAndVideo(
+      String videoPath, String audioPath, String outputPath) async {
     logs.add('Merging audio and video');
     logs.add('-audio: $audioPath');
     logs.add('-video: $videoPath');
@@ -167,28 +255,34 @@ class CreatePostController extends GetxController {
         throw 'Video length (${_formatDuration(videoDuration!)}) must not exceed ${maxDurationAllowed.inMinutes} minutes.';
       }
 
-      String command = '-y -i "$videoPath" -i "$audioPath" -map 0:v -map 1:a -c:v copy${(audioDuration?.inSeconds ?? 0) > (videoDuration?.inSeconds ?? 0) ? '' : ' -shortest'} "$outputPath"';
+      String command =
+          '-y -i "$videoPath" -i "$audioPath" -map 0:v -map 1:a -c:v copy${(audioDuration?.inSeconds ?? 0) > (videoDuration?.inSeconds ?? 0) ? '' : ' -shortest'} "$outputPath"';
 
       final completer = Completer<bool>();
 
       logs.add('Executing FFmpeg cmd: [$command]');
 
-      await FFmpegKit.executeAsync(command, (session) async {
+      await FFmpegKit.executeAsync(
+        command,
+        (session) async {
           try {
             final result = await FFmpegKitConfig.getLastCompletedSession();
             final returnCode = await result?.getReturnCode();
-            logs.add('Command executed(${returnCode?.getValue()}) [${await result?.getFailStackTrace()}]');
+            logs.add(
+                'Command executed(${returnCode?.getValue()}) [${await result?.getFailStackTrace()}]');
             if (ReturnCode.isSuccess(returnCode)) {
               completer.complete(true);
             } else {
-              completer.completeError(Exception('FFmpeg processing failed with return code: $returnCode'));
+              completer.completeError(Exception(
+                  'FFmpeg processing failed with return code: $returnCode'));
             }
           } catch (error) {
             logs.add('progress crashed: error: $error');
-            completer.completeError(Exception('Error during FFmpeg processing: $error'));
+            completer.completeError(
+                Exception('Error during FFmpeg processing: $error'));
           }
         },
-            (log) => logs.add("FFmpeg log: ${log.getMessage()}"),
+        (log) => logs.add("FFmpeg log: ${log.getMessage()}"),
       );
 
       return await completer.future;
@@ -200,7 +294,8 @@ class CreatePostController extends GetxController {
     }
   }
 
-  Future<bool> _createSlideshow(List<String> selectedImages, String audioPath, String outputPath) async {
+  Future<bool> _createSlideshow(
+      List<String> selectedImages, String audioPath, String outputPath) async {
     try {
       final audioPlayer = AudioPlayer();
       final maxDurationAllowed = Duration(minutes: 5);
@@ -208,14 +303,18 @@ class CreatePostController extends GetxController {
       // Get audio duration
       final audioDuration = await audioPlayer.setFilePath(audioPath);
       if ((audioDuration?.inSeconds ?? 0) > maxDurationAllowed.inSeconds) {
-        longToastMessage('Audio length must not exceed ${maxDurationAllowed.inMinutes} minutes');
+        longToastMessage(
+            'Audio length must not exceed ${maxDurationAllowed.inMinutes} minutes');
         return false;
       }
 
       // Create images.txt file
       final tempPath = await getTemporaryDirectory();
       File file = File('${tempPath.path}/images.txt');
-      String fileContent = selectedImages.map((path) => "file '$path'\nduration ${audioDuration!.inSeconds/selectedImages.length}").join("\n");
+      String fileContent = selectedImages
+          .map((path) =>
+              "file '$path'\nduration ${audioDuration!.inSeconds / selectedImages.length}")
+          .join("\n");
 
       await file.writeAsString(fileContent, flush: true, encoding: utf8);
 
@@ -223,10 +322,12 @@ class CreatePostController extends GetxController {
       final listFile = File('${tempPath.path}/list.txt');
       await file.rename(listFile.path);
 
-      print("ishwar:temp File exists? ${listFile.existsSync()}, Content: ${listFile.readAsStringSync()}");
+      print(
+          "ishwar:temp File exists? ${listFile.existsSync()}, Content: ${listFile.readAsStringSync()}");
 
       // FFmpeg command
-      String command = '-f concat -safe 0 -i "${listFile.path}" -i "$audioPath" -vf "fps=25,format=yuv420p" -c:v mpeg4 -c:a aac -strict experimental -b:a 192k -shortest "$outputPath"';
+      String command =
+          '-f concat -safe 0 -i "${listFile.path}" -i "$audioPath" -vf "fps=25,format=yuv420p" -c:v mpeg4 -c:a aac -strict experimental -b:a 192k -shortest "$outputPath"';
 
       print("ishwar:temp Running FFmpeg command -> $command");
 
@@ -234,7 +335,7 @@ class CreatePostController extends GetxController {
 
       await FFmpegKit.executeAsync(
         command,
-            (session) async {
+        (session) async {
           try {
             final returnCode = await session.getReturnCode();
             if (ReturnCode.isSuccess(returnCode)) {
@@ -249,8 +350,9 @@ class CreatePostController extends GetxController {
             completer.complete(false);
           }
         },
-            (log) => print("ishwar:temp FFmpeg log: ${log.getMessage()}"),
-            (stats) => print("ishwar:temp FFmpeg stats: ${stats.getVideoFrameNumber()} frames processed"),
+        (log) => print("ishwar:temp FFmpeg log: ${log.getMessage()}"),
+        (stats) => print(
+            "ishwar:temp FFmpeg stats: ${stats.getVideoFrameNumber()} frames processed"),
       );
 
       return await completer.future;
@@ -271,20 +373,22 @@ class CreatePostController extends GetxController {
     int? commentCount,
     String? organizationId,
   }) async {
-    print(" yash: CreatePostController: organizationId = $organizationId, userId = ${getPrefValue(Keys.USERID)}, posterId = ${FirebaseAuth.instance.currentUser?.uid}");
+    print(
+        " yash: CreatePostController: organizationId = $organizationId, userId = ${getPrefValue(Keys.USERID)}, posterId = ${FirebaseAuth.instance.currentUser?.uid}");
     loadingcontroller.updateLoading(true);
+    print('dss : - $createdAt');
 
     int i = 0;
-
     String finalVideoLink = '';
     String? backgroundMusic;
 
     if (selectedVideo.value != '' && selectedVideo.value.startsWith('http')) {
       finalVideoLink = selectedVideo.value;
     } else if (selectedVideo.value != '') {
-
-      if (selectedAudio.value == null || selectedAudio.value?.startsWith('http') == true) {
-        finalVideoLink = await uploadFile(File(selectedVideo.value), fileNumber: i++);
+      if (selectedAudio.value == null ||
+          selectedAudio.value?.startsWith('http') == true) {
+        finalVideoLink =
+            await uploadFile(File(selectedVideo.value), fileNumber: i++);
       } else {
         longToastMessage('Merging audio with video');
 
@@ -298,7 +402,8 @@ class CreatePostController extends GetxController {
         String? error;
 
         try {
-          result = await _mergeAudioAndVideo(selectedVideo.value, selectedAudio.value!, tempPath.path);
+          result = await _mergeAudioAndVideo(
+              selectedVideo.value, selectedAudio.value!, tempPath.path);
         } catch (mergeError) {
           result = false;
           error = mergeError.toString();
@@ -316,22 +421,23 @@ class CreatePostController extends GetxController {
                 title: Text('Merge failed'),
                 content: /*Obx(() => ListView(
                   children: logs.map((element) => Text(element)).toList(),
-                )),*/ Text(error ?? 'Video and audio cannot be merged'),
+                )),*/
+                    Text(error ?? 'Video and audio cannot be merged'),
                 actions: [
                   TextButton(
                       onPressed: () => Get.back(result: true),
-                      child: Text('Discard', style: TextStyle(color: AppColors.primaryColor))
-                  ),
+                      child: Text('Discard',
+                          style: TextStyle(color: AppColors.primaryColor))),
                   TextButton(
                       onPressed: () => Get.back(result: false),
-                      child: Text('Don\'t use audio', style: TextStyle(color: AppColors.primaryColor))
-                  ),
+                      child: Text('Don\'t use audio',
+                          style: TextStyle(color: AppColors.primaryColor))),
                   TextButton(
                       onPressed: () {
                         Clipboard.setData(ClipboardData(text: logs.join('\n')));
                       },
-                      child: Text('Copy logs', style: TextStyle(color: AppColors.primaryColor))
-                  )
+                      child: Text('Copy logs',
+                          style: TextStyle(color: AppColors.primaryColor)))
                 ],
               );
             },
@@ -344,7 +450,8 @@ class CreatePostController extends GetxController {
             loadingcontroller.updateLoading(false);
             return;
           } else {
-            finalVideoLink = await uploadFile(File(selectedVideo.value), fileNumber: i++);
+            finalVideoLink =
+                await uploadFile(File(selectedVideo.value), fileNumber: i++);
             loadingcontroller.updateLoading(true);
           }
         }
@@ -395,18 +502,22 @@ class CreatePostController extends GetxController {
       }
 
       longToastMessage('Uploading');
-    } else*/ if (selectedAudio.value != null) {
-      backgroundMusic = selectedAudio.value!.startsWith('http') ? selectedAudio.value : await uploadFile(File(selectedAudio.value!), fileNumber: i++);
+    } else*/
+    if (selectedAudio.value != null) {
+      backgroundMusic = selectedAudio.value!.startsWith('http')
+          ? selectedAudio.value
+          : await uploadFile(File(selectedAudio.value!), fileNumber: i++);
     }
 
     final List<String> images = [];
-
 
     for (int j = 0; j < selectedImages.value.length; j++) {
       final postImage = selectedImages.value[j];
       print(postImage);
 
-      final image = postImage.startsWith('http') ? postImage : await uploadFile(File(postImage), fileNumber: i);
+      final image = postImage.startsWith('http')
+          ? postImage
+          : await uploadFile(File(postImage), fileNumber: i);
 
       images.add(image);
 
@@ -452,7 +563,9 @@ class CreatePostController extends GetxController {
     PostModel postModel = PostModel(
       postId: postId,
       userId: organizationId ?? getPrefValue(Keys.USERID),
-      posterId: organizationId!=null?FirebaseAuth.instance.currentUser?.uid??getPrefValue(Keys.USERID):null,
+      posterId: organizationId != null
+          ? FirebaseAuth.instance.currentUser?.uid ?? getPrefValue(Keys.USERID)
+          : null,
       postDesc: captionTextController.text,
       postImages: images,
       backgroundMusic: backgroundMusic,
@@ -467,7 +580,8 @@ class CreatePostController extends GetxController {
       showlevel: showLevel,
       viewsCount: viewCount ?? 0,
     );
-    print("yash:CreatePostController: PostModel created: ${postModel.toJson()}");
+    print(
+        "yash:CreatePostController: PostModel created: ${postModel.toJson()}");
 
     bool res;
 
@@ -508,6 +622,10 @@ class CreatePostController extends GetxController {
       file,
       SettableMetadata(contentType: mimeType),
     );
+    uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+      final progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      print("dss :- Upload progress: ${progress.toStringAsFixed(2)}%");
+    });
     String imageUrl = "";
     try {
       TaskSnapshot snapshot = await uploadTask;
@@ -518,7 +636,6 @@ class CreatePostController extends GetxController {
       return "";
     }
   }
-
 
   // media actions
   Future<String> mediaAction(BuildContext context) async {
@@ -565,63 +682,28 @@ class CreatePostController extends GetxController {
       chewieController?.dispose();
     } else {
       isVideoLoading.value = true;
-      _videoPlayerController = VideoPlayerController.file(File(videoPath))..initialize().then((value) {
-        // setting up chewie controller
-        chewieController = ChewieController(
-          videoPlayerController: _videoPlayerController!,
-          autoPlay: false,
-          autoInitialize: true,
-          allowFullScreen: true,
-          allowMuting: true,
-          allowPlaybackSpeedChanging: true,
-          allowedScreenSleep: false,
-          aspectRatio: _videoPlayerController!.value.aspectRatio,
-          hideControlsTimer: Duration(seconds: 1),
-        );
+      _videoPlayerController = VideoPlayerController.file(File(videoPath))
+        ..initialize().then(
+          (value) {
+            // setting up chewie controller
+            chewieController = ChewieController(
+              videoPlayerController: _videoPlayerController!,
+              autoPlay: false,
+              autoInitialize: true,
+              allowFullScreen: true,
+              allowMuting: true,
+              allowPlaybackSpeedChanging: true,
+              allowedScreenSleep: false,
+              aspectRatio: _videoPlayerController!.value.aspectRatio,
+              hideControlsTimer: Duration(seconds: 1),
+            );
 
-        isVideoLoading.value = false;
-      },
-      );
+            isVideoLoading.value = false;
+          },
+        );
     }
 
     return videoPath;
-  }
-
-  //Camera Actions
-  Future<void> videoAction(BuildContext context) async {
-    await showAdaptiveActionSheet(
-      title: Text(
-        "Select Option",
-        style: TextStyle(fontSize: 25),
-      ),
-      actions: <BottomSheetAction>[
-        BottomSheetAction(
-          title: Text("Camera", style: TextStyle(color: AppColors.gradient2)),
-          onPressed: (c) async {
-            await getVideoFromCamera(context);
-            Get.back();
-          },
-        ),
-        BottomSheetAction(
-          title: Text(
-            "Gallery",
-            style: TextStyle(color: AppColors.gradient2),
-          ),
-          onPressed: (c) async {
-            await getVideoFromGallery(context);
-            Get.back();
-          },
-        )
-      ],
-      cancelAction: CancelAction(
-        title: Text("Cancel"),
-        onPressed: (c) {
-          Get.back();
-          return;
-        },
-      ),
-      context: context,
-    );
   }
 
   //Camera Actions
@@ -678,6 +760,7 @@ class CreatePostController extends GetxController {
     // imageFile.value = File(image!.path);
     await cropView(image);
   }
+
 //change by yg 8/5/25 11:51 am
   // Future<void> getVideoFromCamera(BuildContext context) async {
   //   var video = await ImagePicker().pickVideo(
@@ -693,30 +776,27 @@ class CreatePostController extends GetxController {
   Future<void> getVideoFromCamera(BuildContext context) async {
     try {
       var video = await ImagePicker().pickVideo(
-            source: ImageSource.camera,
-            preferredCameraDevice: CameraDevice.rear,
-          );
+        source: ImageSource.camera,
+        preferredCameraDevice: CameraDevice.rear,
+      );
 
       // resetting the images
-      selectedImages.value = [];
-      if(video != null  ){
-        debugPrint('ds : - In the Video Size Ckeck');
-        int sizeInBytes = await video.length();
-        double sizeInMB = sizeInBytes / (1024 * 1024);
-        if(sizeInMB >= 50){
-          debugPrint('ds : - Video Size is too long $sizeInMB');
-          longToastMessage('Video File Is Too Large');
-        }else{
-          selectedVideo.value = video.path;
+      if (video != null) {
+        int videoSize = await video.length();
+        final sizeInMB = videoSize / (1024 * 1024);
+        if (sizeInMB >= 50 && sizeInMB <= 96) {
+          var compressedVideo = await VideoCompressor.compressVideo(video.path);
+          if (compressedVideo!.file != null) {
+            selectedVideo.value = compressedVideo.path!;
+            print('dss : - ${compressedVideo.file}');
+          }
+        } else if (sizeInMB <= 50) {
+          selectedVideo.value = video.path!;
+        } else {
+          longToastMessage('Video File too large');
+          selectedVideo.value = '';
         }
       }
-      else{
-        // selectedVideo.value = video == null ? '' : video.path;
-        selectedVideo.value = '';
-      }
-
-
-
     } catch (e) {
       print("ishwar: yash; error on get video from camera: $e");
     }
@@ -746,28 +826,29 @@ class CreatePostController extends GetxController {
 
     // resetting the images
     selectedImages.value = [];
-    if(video != null  ){
-      debugPrint('ds : - In the Video Size Ckeck');
-      int sizeInBytes = await video.length();
-      double sizeInMB = sizeInBytes / (1024 * 1024);
-      if(sizeInMB >= 50){
-       debugPrint('ds : - Video Size is too long $sizeInMB');
-       longToastMessage('Video File Is Too Large');
-      }else{
+    if (video != null) {
+      int videoSize = await video.length();
+      final sizeInMB = videoSize / (1024 * 1024);
+      if (sizeInMB >= 50 && sizeInMB <= 96) {
+        var compressedVideo = await VideoCompressor.compressVideo(video.path);
+        if (compressedVideo!.file != null) {
+          final compressdLength = await compressedVideo.file!.length();
+          print('dss :- ${compressdLength/(1024*1024)}');
+          selectedVideo.value = compressedVideo.path!;
+          print('dss : - ${compressedVideo.file}');
+        }
+      } else if (sizeInMB <= 50) {
         selectedVideo.value = video.path;
+      } else {
+        longToastMessage('Video File too large');
+        selectedVideo.value = '';
       }
     }
-    else{
-     // selectedVideo.value = video == null ? '' : video.path;
-      selectedVideo.value = '';
-    }
-
   }
 
   Future<void> cropView(var image) async {
     CroppedFile? croppedFile = await ImageCropper().cropImage(
       sourcePath: image.path,
-
       uiSettings: [
         AndroidUiSettings(
           aspectRatioPresets: [CropAspectRatioPreset.square],
@@ -786,6 +867,8 @@ class CreatePostController extends GetxController {
     selectedImages.value.add(croppedFile!.path);
     selectedImages.refresh();
   }
+
+
 }
 
 // "C:\Program Files\Java\jdk-1.8\bin\keytool.exe" -genkey -v -keystore "C:\Users\andro\AndroidStudioProjects\jksfolder\key.jks" -keyalg RSA -keysize 2048 -validity 10000 -alias shikshasutram

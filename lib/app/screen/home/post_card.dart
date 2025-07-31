@@ -156,7 +156,7 @@ audioController.registerAudioPlayer(audioPlayer!);
                 additionalOptions: (context) {
                   return [
                     OptionItem(
-                      onTap: () {
+                      onTap: (c) {
                         _handleFullScreen();
                       },
                       iconData: Icons.fullscreen,

@@ -24,8 +24,10 @@ class DownloadPradhaanCardScreen extends StatefulWidget {
     required this.votesReceived,
     required this.fundsRaised,
     required this.autoFund,
-  });
+    required this.designation
 
+
+  });
   final String imageUrl;
   final String name;
   final String userLevelLocation;
@@ -33,6 +35,7 @@ class DownloadPradhaanCardScreen extends StatefulWidget {
   final String votesReceived;
   final String fundsRaised;
   final String autoFund;
+  final String designation;
 
   @override
   State<DownloadPradhaanCardScreen> createState() =>
@@ -148,7 +151,7 @@ class _DownloadPradhaanCardScreenState
                                   widget.userLevelLocation +
                                       (widget.isPradhaanAtHisLevel
                                           ? ' - Pradhaan'
-                                          : ''),
+                                          : '-N/A'),
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 18,
@@ -160,10 +163,7 @@ class _DownloadPradhaanCardScreenState
                               ),
                               _buildExitDialogDataRow(
                                 'Designation:',
-                                valueWidget: Text(
-                                (widget.isPradhaanAtHisLevel
-                                          ? '  ${widget.userLevelLocation} - Pradhaan'
-                                          : 'N/A'),
+                                valueWidget: Text(widget.designation,
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 18,

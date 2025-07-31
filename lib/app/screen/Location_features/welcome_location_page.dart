@@ -141,7 +141,8 @@ class _WelcomeLocationPageState extends State<WelcomeLocationPage>
                         )),
                 )),
           ),
-          title: 'Welcome to \n ${widget.locationName}',
+          //title: 'Welcome to \n ${widget.locationName}',
+          title: 'Top 10 Leaders of \n ${widget.locationName}',
           scaffoldKey: null,
           elevation: 0,
           bottom: Padding(

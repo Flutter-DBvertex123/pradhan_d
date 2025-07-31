@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chunaw/app/controller/home/create_post_controller.dart';
 import 'package:chunaw/app/controller/home/home_controller.dart';
 import 'package:chunaw/app/dbvertex/area_pradhan_page.dart';
 import 'package:chunaw/app/dbvertex/home_top_ten_users_page.dart';
@@ -31,6 +32,7 @@ import 'package:get/get.dart';
 
 import '../../dbvertex/revenue_screen.dart';
 import '../../dbvertex/utils/donations_manager.dart';
+import '../../widgets/app_toast.dart';
 
 class HomeTabScreen extends StatefulWidget {
   const HomeTabScreen({Key? key}) : super(key: key);
@@ -63,6 +65,23 @@ class _HomeTabScreenState extends State<HomeTabScreen>
         ),
       ],
     );
+  }
+  String getLevelName(dynamic pradhan) {
+    if (pradhan == null) return 'N/A';
+
+    final level = pradhan['level'];
+    switch (level) {
+      case 1:
+        return 'Ward-Pradhaan';
+      case 2:
+        return 'City-Pradhaan';
+      case 3:
+        return 'State-Pradhaan';
+      case 4:
+        return 'Country-Pradhaan';
+      default:
+        return 'N/A';
+    }
   }
 
   activeIconWidget(Widget icon) {
@@ -412,7 +431,7 @@ class _HomeTabScreenState extends State<HomeTabScreen>
       ),
       body: PopScope(
         canPop: false,
-        onPopInvoked: (didPop) {
+        onPopInvoked: (didPop)  {
           _showExitDialog(context);
         },
         child: Stack(
@@ -445,11 +464,10 @@ class _HomeTabScreenState extends State<HomeTabScreen>
                     AppRoutes.navigateToLogin(removeGuestLogin: true);
                     return;
                   }
-
-                  final int? navigateTo = await AppRoutes.navigateToAddPost();
-
-                  print('navigate to: $navigateTo');
-
+                  print('dss : - ${Timestamp.now()}');
+                  //final int? navigateTo = await AppRoutes.navigateToAddPost();
+                  final int? navigateTo =  await checkPostLimit();
+                  //print('navigate to: $navigateTo');
                   // if navigateTo is null, do nothing
                   if (navigateTo == null) {
                     return;
@@ -614,7 +632,7 @@ class _HomeTabScreenState extends State<HomeTabScreen>
                         country: country,
                       );
                       final int upvotesReceived = data['upvote_count'] ?? 0;
-
+                      print('dss : - $userId');
                       List<Map> scopeData = [postal, city, state, country]
                           .sublist(max(0, userLevel - 2))
                           .reversed
@@ -623,6 +641,7 @@ class _HomeTabScreenState extends State<HomeTabScreen>
                           scopeData[scopeData.length - 1]['id'] ?? '';
                       List<String> scope =
                           scopeData.map<String>((val) => val['name']).toList();
+
 
                       print("ishwar: $scope suffix: $scopeSuffix");
 
@@ -670,189 +689,220 @@ class _HomeTabScreenState extends State<HomeTabScreen>
                           future: DonationsManager()
                               .getDonationsForScope(returnDonors: true),
                           builder: (context, snapshot) {
-                            return Stack(
-                              children: [
-                                Image.asset('assets/text_india_map.png'),
-                                Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    _buildProfileImage(profileImage),
-                                    const SizedBox(
-                                      height: 5,
-                                    ),
-                                    Text(
-                                      name.toUpperCase(),
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                    Image.asset(
-                                      'assets/pradhaan_card_divider.png',
-                                      width: min(
-                                          120,
-                                          MediaQuery.of(context).size.width /
-                                              2),
-                                    ),
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                    _buildExitDialogDataRow(
-                                      'User Level',
-                                      valueWidget: Text(
-                                        userLevelLocation['name'] +
-                                            ((isPradhaanAtHisLevel ?? false)
-                                                ? ' - Pradhaan'
-                                                : ''),
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                          color: AppColors.primaryColor,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    _buildExitDialogDataRow(
-                                      'Designation',
-                                      valueWidget: Text(
-                                       ((isPradhaanAtHisLevel ?? false)
-                                                ? '${userLevelLocation['name']} - Pradhaan'
-                                                : 'N/A'),
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                          color: AppColors.primaryColor,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    _buildExitDialogDataRow('Votes:',
-                                        value: upvotesReceived.toString()),
-                                    _buildExitDialogDataRow('Fund Raised',
-                                        value:
-                                            "₹${revenue.toStringAsFixed(1)}"),
-                                    // _buildExitDialogDataRow('Free Auto Fund',
-                                    //     value: "₹${snapshot.data?.totalDonatedAmount.toStringAsFixed(1)??0}"),
-                                    // const SizedBox(
-                                    //   height: 20,
-                                    // ),
-                                    // _buildExitDialogDataRow(
-                                    //     'Contributions to\nPradhaan Free Taxi',
-                                    //     titleColor: AppColors.primaryColor,
-                                    //     value: "₹${snapshot.data?.totalDonatedAmount.toStringAsFixed(1) ?? 0}"
-                                    // ),
-                                    const SizedBox(
-                                      height: 50,
-                                    ),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        const SizedBox(
-                                          width: 10,
-                                        ),
-                                        Expanded(
-                                          child: ElevatedButton(
-                                            onPressed: () {
-                                              if (isLoading = false) {
-                                                return;
-                                              }
+                            return FutureBuilder(
+                              future: FirebaseFirestore.instance.collection(PRADHAN_DB).where('pradhan_id', isEqualTo: userId).get(),
+                              builder: (context, asyncSnapshot) {
 
-                                              // if not loading, but value is still null, there was probably an error
-                                              if (isPradhaanAtHisLevel ==
-                                                  null) {
-                                                Navigator.of(context).pop();
-                                                showSnackBar(context,
-                                                    message:
-                                                        'Something went wrong!');
-                                                return;
-                                              }
-
-                                              // if everything went well, push the download
-                                              AppRoutes
-                                                  .navigateToDownloadPradhaanCard(
-                                                      fundsRaised:
-                                                          revenue.toString(),
-                                                      imageUrl: profileImage,
-                                                      name: name,
-                                                      userLevelLocation:
-                                                          userLevelLocation[
-                                                              'name'],
-                                                      votesReceived:
-                                                          upvotesReceived
-                                                              .toString(),
-                                                      isPradhaanAtHisLevel:
-                                                          isPradhaanAtHisLevel!,
-                                                      autoFund:
-                                                          "₹${snapshot.data?.totalDonatedAmount.toStringAsFixed(1) ?? 0}");
-                                            },
-                                            style: ButtonStyle(
-                                              backgroundColor:
-                                                  MaterialStateProperty.all(
-                                                Colors.transparent,
-                                              ),
-                                              padding: WidgetStatePropertyAll(
-                                                  EdgeInsets.zero),
-                                              shape: MaterialStateProperty.all(
-                                                RoundedRectangleBorder(
-                                                  side: BorderSide(
-                                                    width: 1.5,
-                                                    color: (wasPradhaanBefore ??
-                                                            false)
-                                                        ? AppColors.primaryColor
-                                                            .withOpacity(0.6)
-                                                        : AppColors
-                                                            .primaryColor,
-                                                  ),
-                                                  borderRadius:
-                                                      BorderRadius.circular(7),
-                                                ),
-                                              ),
-                                              elevation:
-                                                  MaterialStateProperty.all(0),
+                                if(snapshot.hasData || (!snapshot.hasData || asyncSnapshot.data!.docs.isEmpty) ) {
+                                  var pradhan = (!asyncSnapshot.hasData || asyncSnapshot.data!.docs.isEmpty)  ? null : asyncSnapshot.data!.docs.first;
+                                  return Stack(
+                                    children: [
+                                      Image.asset('assets/text_india_map.png'),
+                                      Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          _buildProfileImage(profileImage),
+                                          const SizedBox(
+                                            height: 5,
+                                          ),
+                                          Text(
+                                            name.toUpperCase(),
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
                                             ),
-                                            child: isLoading
-                                                ? SizedBox(
+                                          ),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          Image.asset(
+                                            'assets/pradhaan_card_divider.png',
+                                            width: min(
+                                                120,
+                                                MediaQuery
+                                                    .of(context)
+                                                    .size
+                                                    .width /
+                                                    2),
+                                          ),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          _buildExitDialogDataRow(
+                                            'User Level',
+                                            valueWidget: Text(
+                                              userLevelLocation['name'] +
+                                                  ((isPradhaanAtHisLevel ??
+                                                      false)
+                                                      ? ' - Pradhaan'
+                                                      : '-N/A'),
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                                color: AppColors.primaryColor,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          _buildExitDialogDataRow(
+                                            'Designation',
+                                            valueWidget: Text(
+                                              getLevelName(pradhan),
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                                color: AppColors.primaryColor,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          _buildExitDialogDataRow('Votes:',
+                                              value: upvotesReceived
+                                                  .toString()),
+                                          _buildExitDialogDataRow('Fund Raised',
+                                              value:
+                                              "₹${revenue.toStringAsFixed(1)}"),
+                                          // _buildExitDialogDataRow('Free Auto Fund',
+                                          //     value: "₹${snapshot.data?.totalDonatedAmount.toStringAsFixed(1)??0}"),
+                                          // const SizedBox(
+                                          //   height: 20,
+                                          // ),
+                                          // _buildExitDialogDataRow(
+                                          //     'Contributions to\nPradhaan Free Taxi',
+                                          //     titleColor: AppColors.primaryColor,
+                                          //     value: "₹${snapshot.data?.totalDonatedAmount.toStringAsFixed(1) ?? 0}"
+                                          // ),
+                                          const SizedBox(
+                                            height: 50,
+                                          ),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment
+                                                .end,
+                                            children: [
+                                              const SizedBox(
+                                                width: 10,
+                                              ),
+                                              Expanded(
+                                                child: ElevatedButton(
+                                                  onPressed: () {
+                                                    if (isLoading = false) {
+                                                      return;
+                                                    }
+
+                                                    // if not loading, but value is still null, there was probably an error
+                                                    if (isPradhaanAtHisLevel ==
+                                                        null) {
+                                                      Navigator
+                                                          .of(context)
+                                                          .pop();
+                                                      showSnackBar(context,
+                                                          message:
+                                                          'Something went wrong!');
+                                                      return;
+                                                    }
+
+                                                    // if everything went well, push the download
+                                                    AppRoutes
+                                                        .navigateToDownloadPradhaanCard(
+                                                      designation: getLevelName(pradhan),
+                                                        fundsRaised:
+                                                        revenue.toString(),
+                                                        imageUrl: profileImage,
+                                                        name: name,
+                                                        userLevelLocation:
+                                                        userLevelLocation[
+                                                        'name'],
+                                                        votesReceived:
+                                                        upvotesReceived
+                                                            .toString(),
+                                                        isPradhaanAtHisLevel:
+                                                        isPradhaanAtHisLevel!,
+                                                        autoFund:
+                                                        "₹${snapshot.data
+                                                            ?.totalDonatedAmount
+                                                            .toStringAsFixed(
+                                                            1) ?? 0}");
+                                                  },
+                                                  style: ButtonStyle(
+                                                    backgroundColor:
+                                                    MaterialStateProperty.all(
+                                                      Colors.transparent,
+                                                    ),
+                                                    padding: WidgetStatePropertyAll(
+                                                        EdgeInsets.zero),
+                                                    shape: MaterialStateProperty
+                                                        .all(
+                                                      RoundedRectangleBorder(
+                                                        side: BorderSide(
+                                                          width: 1.5,
+                                                          color: (wasPradhaanBefore ??
+                                                              false)
+                                                              ? AppColors
+                                                              .primaryColor
+                                                              .withOpacity(0.6)
+                                                              : AppColors
+                                                              .primaryColor,
+                                                        ),
+                                                        borderRadius:
+                                                        BorderRadius.circular(
+                                                            7),
+                                                      ),
+                                                    ),
+                                                    elevation:
+                                                    MaterialStateProperty.all(
+                                                        0),
+                                                  ),
+                                                  child: isLoading
+                                                      ? SizedBox(
                                                     height: 15,
                                                     width: 15,
                                                     child:
-                                                        CircularProgressIndicator(
+                                                    CircularProgressIndicator(
                                                       color: AppColors
                                                           .primaryColor,
                                                       strokeWidth: 2,
                                                     ),
                                                   )
-                                                : Padding(
+                                                      : Padding(
                                                     padding: const EdgeInsets
                                                         .symmetric(
                                                         horizontal: 2),
                                                     child: Text(
                                                       'Download',
                                                       overflow:
-                                                          TextOverflow.ellipsis,
+                                                      TextOverflow.ellipsis,
                                                       style: TextStyle(
                                                         color: AppColors
                                                             .primaryColor,
                                                       ),
                                                     ),
                                                   ),
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                width: 10,
+                                              ),
+                                              Expanded(
+                                                child: _buildExitButton(),
+                                              ),
+                                            ],
                                           ),
-                                        ),
-                                        const SizedBox(
-                                          width: 10,
-                                        ),
-                                        Expanded(
-                                          child: _buildExitButton(),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                        ],
+                                      ),
+                                    ],
+                                  );
+                                }
+                                else{
+                                  return SizedBox(
+                                    height: 100,
+                                    width: 100,
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+
+                              }
                             );
                           });
                     },
@@ -1157,5 +1207,69 @@ class _HomeTabScreenState extends State<HomeTabScreen>
       default:
         return {};
     }
+  }
+
+  Future<int?> checkPostLimit() async {
+    final level = getPrefValue(Keys.LEVEL);
+    int todayPosts = await getRecentPostCount();
+
+    switch (level) {
+      case "1":
+        return await AppRoutes.navigateToAddPost();
+
+      case "2":
+        if (todayPosts < 5) {
+          return await AppRoutes.navigateToAddPost();
+        } else {
+          longToastMessage('Your daily post limit is exceeded');
+          return null;
+        }
+
+      case "3":
+        if (todayPosts < 3) {
+          return await AppRoutes.navigateToAddPost();
+        } else {
+          longToastMessage('Your daily post limit is exceeded');
+          return null;
+        }
+
+      case "4":
+        if (todayPosts < 1) {
+          return await AppRoutes.navigateToAddPost();
+        } else {
+          longToastMessage('Your daily post limit is exceeded');
+          return null;
+        }
+
+      default:
+        print('Error occurred while checking daily post limit');
+        return null;
+    }
+  }
+
+  Future<int> getRecentPostCount() async {
+    int todayPosts = 0;
+    final userId = getPrefValue(Keys.USERID);
+
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection(POST_DB)
+        .where('user_id', isEqualTo: userId)
+        .get();
+
+    final now = DateTime.now();
+
+    for (var doc in querySnapshot.docs) {
+      final postTimestamp = doc['createdAt'] as Timestamp;
+      final postDate = postTimestamp.toDate();
+      print('dss post : - $postDate');
+
+      if (postDate.year == now.year &&
+          postDate.month == now.month &&
+          postDate.day == now.day) {
+        todayPosts++;
+      }
+    }
+    print('dss : - $todayPosts');
+    return todayPosts;
   }
 }
