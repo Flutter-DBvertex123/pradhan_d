@@ -44,6 +44,7 @@ class CreatePostController extends GetxController {
   final isVideoLoading = false.obs;
   final selectedVideo = Rx<String>('');
   final selectedImages = Rx<List<String>>([]);
+  final isLevelLoading = false.obs;
 
   String? audioType;
   final selectedAudio = Rx<String?>(null);
@@ -73,36 +74,250 @@ class CreatePostController extends GetxController {
     postId = postModel.postId;
     captionTextController.text = postModel.postDesc;
   }
-
-  @override
-  void onInit() {
+  Future<void> onInit() async {
     super.onInit();
+    isLevelLoading.value = true;
     captionTextController.addListener(_onTextChange);
     postId = "${getRandomString(10)}_${getPrefValue(Keys.USERID)}";
-    switch (getPrefValue(Keys.LEVEL)) {
+    final userId = getPrefValue(Keys.USERID);
+    final userLevel = getPrefValue(Keys.LEVEL);
+    availableLevels.clear();
+
+    // Get Pradhaan Level
+    int pradhanLevel = 0;
+    final pradhanSnapshot = await FirebaseFirestore.instance
+        .collection(PRADHAN_DB)
+        .where('pradhan_id', isEqualTo: userId)
+        .get();
+
+    if (pradhanSnapshot.docs.isNotEmpty) {
+      pradhanLevel = pradhanSnapshot.docs.first.data()['level'] ?? 0;
+    }
+    print('dss : - pradhan level $pradhanLevel');
+    print('dss : - user leve; $userLevel');
+
+    // Populate available levels based on limits
+    List<String> allLevels = [
+      "Postal Level",
+      "City Level",
+      "State Level",
+      "Country Level"
+    ];
+
+    for (var level in allLevels) {
+      bool allowed = await canPostAtLevel(level.toLowerCase(), int.parse(userLevel), pradhanLevel);
+      if (allowed) availableLevels.add(level);
+    }
+    isLevelLoading.value = false;
+    print('dss : - user level $userLevel');
+    print('dss : - availableLevels: $availableLevels');
+  }
+
+  Future<bool> canPostAtLevel(String levelKey, int userLevel, int pradhanLevel) async {
+    if (levelKey == "postal level") return true;
+
+    final levelNameToCode = {
+      "city level": 2,
+      "state level": 3,
+      "country level": 4
+    };
+
+    final levelCode = levelNameToCode[levelKey] ?? 0;
+
+    // Allow unlimited posts if user is Pradhaan at this level
+    if (pradhanLevel == levelCode) return true;
+
+    int postCount = await getRecentPostCount(levelCode);
+    final postLimits = {
+      2: 5, // District
+      3: 3, // State
+      4: 1, // Country
+    };
+
+    return postCount < (postLimits[levelCode] ?? 0);
+  }
+
+ /* @override
+  Future<void> onInit() async {
+    super.onInit();
+    int? pradhanLevel;
+    captionTextController.addListener(_onTextChange);
+    postId = "${getRandomString(10)}_${getPrefValue(Keys.USERID)}";
+
+    final pradhanSnapshot = await FirebaseFirestore.instance
+        .collection(PRADHAN_DB)
+        .where('pradhan_id', isEqualTo: getPrefValue(Keys.USERID))
+        .get();
+
+// Fix: only assign 0 if no result found
+    if (pradhanSnapshot.docs.isNotEmpty) {
+      pradhanLevel = pradhanSnapshot.docs.first.data()['level'];
+    } else {
+      pradhanLevel = 0;
+    }
+    print('dss : - pradhan level $pradhanLevel');
+
+    int todayPosts = await getRecentPostCount();
+    String usersLevel = getPrefValue(Keys.LEVEL);
+    print('dss : - user level $usersLevel');
+
+// Clear list before populating (if not already done)
+    availableLevels.clear();
+
+    bool canPost = false;
+    switch (usersLevel) {
       case "1":
-        availableLevels.addAll(["Postal Level"]);
+      // Ward level: always allowed
+        canPost = true;
         break;
       case "2":
-        availableLevels.addAll(["Postal Level", "City Level"]);
+        canPost = todayPosts < 5;
         break;
       case "3":
-        availableLevels.addAll(["Postal Level", "City Level", "State Level"]);
+        canPost = todayPosts < 3;
         break;
       case "4":
+        canPost = todayPosts < 1;
+        break;
+      default:
+        canPost = false;
+    }
+
+    if (canPost) {
+      availableLevels.addAll([
+        "Postal Level",
+        "City Level",
+        "State Level",
+        "Country Level",
+      ]);
+    } else {
+      switch (pradhanLevel) {
+        case 1:
+          availableLevels.add("Postal Level");
+          break;
+        case 2:
+          availableLevels.add("City Level");
+          break;
+        case 3:
+          availableLevels.add("State Level");
+          break;
+        case 4:
+          availableLevels.add("Country Level");
+          break;
+        default:
+          availableLevels.add("Postal Level");
+      }
+    }
+  }*/
+
+      /*int? pradhanLevel;
+    captionTextController.addListener(_onTextChange);
+    postId = "${getRandomString(10)}_${getPrefValue(Keys.USERID)}";
+    final pradhan = await FirebaseFirestore.instance.collection(PRADHAN_DB).where('pradhan_id', isEqualTo: getPrefValue(Keys.USERID)).get();
+    if(pradhan != null){
+      pradhanLevel = await pradhan.docs.first.data()['level'];
+    }
+    pradhanLevel = 0;
+    print('dss : - pradhan level $pradhanLevel');
+    int todayPosts = await getRecentPostCount();
+    String usersLevel = getPrefValue(Keys.LEVEL);
+    print('dss : - user level $usersLevel'
+    );
+    switch (usersLevel) {
+
+      case "1":
+        availableLevels.addAll(
+            ["Postal Level", "City Level", "State Level", "Country Level"]);
+        //availableLevels.addAll(["Postal Level"]);
+        break;
+      case "2":
+        {
+          if(todayPosts < 5 ){
+            availableLevels.addAll(
+                ["Postal Level", "City Level", "State Level", "Country Level"]);
+          }else{
+            switch (pradhanLevel){
+              case 1:{
+                availableLevels.addAll(
+                    ["Postal Level"]);
+              }break;
+              case 2:{
+                availableLevels.addAll(
+                    ["City Level"]);
+              } break;
+              case 3:{
+                availableLevels.addAll(
+                    ["State Level"]);
+
+              }break;
+              case 4:{
+                availableLevels.addAll(["Country Level"]);
+              }break;
+              default:
+            }
+          }
+        }
+
+      case "3":
+        if(todayPosts < 3){
+          availableLevels.addAll(
+              ["Postal Level", "City Level", "State Level", "Country Level"]);
+        }else{
+          switch (pradhanLevel){
+            case 1:{
+              availableLevels.addAll(
+                  ["Postal Level"]);
+            }case 2:{
+            availableLevels.addAll(
+                ["City Level"]);
+          }case 3:{
+            availableLevels.addAll(
+                ["State Level"]);
+          }case 4:{
+            availableLevels.addAll(
+                ["Country Level"]);
+          }
+          }
+        }
+        //availableLevels.addAll(["Postal Level", "City Level", "State Level"]);
+        break;
+      case "4":
+        if(todayPosts < 1){
+          availableLevels.addAll(
+              ["Postal Level", "City Level", "State Level", "Country Level"]);
+        }else{
+          switch (pradhanLevel){
+            case 1:{
+              availableLevels.addAll(
+                  ["Postal Level"]);
+              break;
+            }case 2:{
+            availableLevels.addAll(
+                ["City Level"]);
+            break;
+          }case 3:{
+            availableLevels.addAll(
+                ["State Level"]);
+            break;
+          }case 4:{
+            availableLevels.addAll(
+                ["Country Level"]);
+
+          }
+          break;
+          }
+        }
         availableLevels.addAll(
             ["Postal Level", "City Level", "State Level", "Country Level"]);
         break;
       default:
-        availableLevels.addAll(["Postal Level"]);
+         availableLevels.addAll(["Postal Level"]);
+  }
+}*/
+    _onTextChange() {
+      String text = captionTextController.text;
+      captionLength.value = 2000 - text.length;
     }
-  }
-
-  _onTextChange() {
-    String text = captionTextController.text;
-    captionLength.value = 2000 - text.length;
-  }
-
   void insertKey(String keyStr) {
     final text = captionTextController.text;
     final selection = captionTextController.selection;
@@ -148,7 +363,7 @@ class CreatePostController extends GetxController {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 26),
               child: isLoading
                   ? Container(
-                height: 250,
+                height: MediaQuery.of(context).size.height/4.5,
                       alignment: Alignment.center,
                       width: double.maxFinite,
                       child: Column(
@@ -867,7 +1082,75 @@ class CreatePostController extends GetxController {
     selectedImages.value.add(croppedFile!.path);
     selectedImages.refresh();
   }
+ /* Future<int> getRecentPostCount() async {
+    int todayPosts = 0;
+    final userId = getPrefValue(Keys.USERID);
 
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection(POST_DB)
+        .where('user_id', isEqualTo: userId)
+        .get();
+
+    final now = DateTime.now();
+
+    for (var doc in querySnapshot.docs) {
+      final postTimestamp = doc['createdAt'] as Timestamp;
+      final postDate = postTimestamp.toDate();
+      print('dss post : - $postDate');
+
+      if (postDate.year == now.year &&
+          postDate.month == now.month &&
+          postDate.day == now.day) {
+        todayPosts++;
+      }
+    }
+    print('dss : - $todayPosts');
+    return todayPosts;
+  }
+*/
+ /* Future<int> getRecentPostCount(int levelCode) async {
+    final userId = getPrefValue(Keys.USERID);
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
+
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection(POST_DB)
+        .where('user_id', isEqualTo: userId)
+        .where('level', isEqualTo: levelCode)
+        .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+        .get();
+
+    return querySnapshot.docs.length;
+  }*/
+  Future<int> getRecentPostCount(int levelCode) async {
+    int todayPosts = 0;
+    try {
+      final userId = getPrefValue(Keys.USERID);
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
+
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection(POST_DB)
+          .where('user_id', isEqualTo: userId)
+          .where('level', isEqualTo: levelCode).get();
+      querySnapshot.docs.forEach((post){
+        final postTimestamp = post['createdAt'] as Timestamp;
+        final postDate = postTimestamp.toDate();
+        if (postDate.year == now.year &&
+            postDate.month == now.month &&
+            postDate.day == now.day) {
+          todayPosts++;
+        }
+      });
+      print('dss : - post limit on level $levelCode is ${querySnapshot.docs
+          .length}');
+      print('dss :- date $startOfDay');
+      return todayPosts;
+    } catch (e) {
+      print('Error getting recent post count: $e');
+      return 0; // Return 0 if no posts found or any error occurs
+    }
+  }
 
 }
 

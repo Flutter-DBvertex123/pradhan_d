@@ -466,7 +466,7 @@ class _HomeTabScreenState extends State<HomeTabScreen>
                   }
                   print('dss : - ${Timestamp.now()}');
                   //final int? navigateTo = await AppRoutes.navigateToAddPost();
-                  final int? navigateTo =  await checkPostLimit();
+                  final int? navigateTo =  await AppRoutes.navigateToAddPost();
                   //print('navigate to: $navigateTo');
                   // if navigateTo is null, do nothing
                   if (navigateTo == null) {
@@ -1209,6 +1209,32 @@ class _HomeTabScreenState extends State<HomeTabScreen>
     }
   }
 
+  /*Future<int> getRecentPostCount() async {
+    int todayPosts = 0;
+    final userId = getPrefValue(Keys.USERID);
+
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection(POST_DB)
+        .where('user_id', isEqualTo: userId)
+        .get();
+
+    final now = DateTime.now();
+
+    for (var doc in querySnapshot.docs) {
+      final postTimestamp = doc['createdAt'] as Timestamp;
+      final postDate = postTimestamp.toDate();
+      print('dss post : - $postDate');
+
+      if (postDate.year == now.year &&
+          postDate.month == now.month &&
+          postDate.day == now.day) {
+        todayPosts++;
+      }
+    }
+    print('dss : - $todayPosts');
+    return todayPosts;
+  }
+
   Future<int?> checkPostLimit() async {
     final level = getPrefValue(Keys.LEVEL);
     int todayPosts = await getRecentPostCount();
@@ -1245,31 +1271,5 @@ class _HomeTabScreenState extends State<HomeTabScreen>
         print('Error occurred while checking daily post limit');
         return null;
     }
-  }
-
-  Future<int> getRecentPostCount() async {
-    int todayPosts = 0;
-    final userId = getPrefValue(Keys.USERID);
-
-    final querySnapshot = await FirebaseFirestore.instance
-        .collection(POST_DB)
-        .where('user_id', isEqualTo: userId)
-        .get();
-
-    final now = DateTime.now();
-
-    for (var doc in querySnapshot.docs) {
-      final postTimestamp = doc['createdAt'] as Timestamp;
-      final postDate = postTimestamp.toDate();
-      print('dss post : - $postDate');
-
-      if (postDate.year == now.year &&
-          postDate.month == now.month &&
-          postDate.day == now.day) {
-        todayPosts++;
-      }
-    }
-    print('dss : - $todayPosts');
-    return todayPosts;
-  }
+  }*/
 }

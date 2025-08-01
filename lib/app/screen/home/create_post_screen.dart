@@ -5,6 +5,7 @@ import 'package:chewie/chewie.dart';
 import 'package:chunaw/app/dbvertex/music/music_preview_dialog.dart';
 import 'package:chunaw/app/models/post_model.dart';
 import 'package:chunaw/app/utils/app_pref.dart';
+import 'package:chunaw/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -137,7 +138,6 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
   _createDescAndMedia() {
     String username = getPrefValue(Keys.USERNAME);
-
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 15.w, horizontal: 26.0.w),
       child: Row(
@@ -345,51 +345,69 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   }
 
   _showLevelSelector() async {
-    String? selectedLevel = await showModalBottomSheet(
+    String? selectedLevel = await showModalBottomSheet<String>(
       context: context,
       useSafeArea: true,
       showDragHandle: true,
       backgroundColor: AppColors.white,
       builder: (context) {
-        return SizedBox(
-          width: MediaQuery.sizeOf(context).width,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 26.0.w, vertical: 20.w),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: List.generate(
-                createPostController.availableLevels.length, (index) {
-                  return InkWell(
-                    onTap: () => Get.back(result: createPostController.availableLevels[index]),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12.w),
-                          child: Text(
-                            createPostController.availableLevels[index],
-                            style: TextStyle(
-                              color: AppColors.black,
-                              fontSize: 20.0.w,
-                              fontWeight: FontWeight.w500,
+        return Obx(() {
+          if (createPostController.isLevelLoading.value) {
+            return SizedBox(
+              height: MediaQuery.of(context).size.height/4,
+                child:  Center(child: CircularProgressIndicator(
+                  color: AppColors.primaryColor,
+                )));
+          } else {
+            return SizedBox(
+              width: MediaQuery.sizeOf(context).width,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 26.0.w, vertical: 20.w),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: List.generate(
+                    createPostController.availableLevels.length,
+                        (index) {
+                      final level = createPostController.availableLevels[index];
+                      return InkWell(
+                        onTap: () => Get.back(result: level),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.symmetric(vertical: 12.w),
+                              child: Text(
+                                level,
+                                style: TextStyle(
+                                  color: AppColors.black,
+                                  fontSize: 20.0.w,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ),
-                          ),
+                            Divider(
+                              color: index != createPostController.availableLevels.length - 1
+                                  ? Colors.grey[300]
+                                  : Colors.transparent,
+                              thickness: 1,
+                            ),
+                          ],
                         ),
-                          Divider(color: index != createPostController.availableLevels.length - 1 ? Colors.grey[300] : Colors.transparent, thickness: 1),
-                      ],
-                    ),
-                  );
-                },
+                      );
+                    },
+                  ),
+                ),
               ),
-            ),
-          ),
-        );
+            );
+          }
+        });
       },
     );
-    createPostController.selectedLevel.value = selectedLevel ?? createPostController.selectedLevel.value;
+
+    createPostController.selectedLevel.value =
+        selectedLevel ?? createPostController.selectedLevel.value;
   }
+
 
   _createOptionTile({ required String title, String? subtitle, required IconData icon, VoidCallback? onPressed, bool enableClearButton = false, VoidCallback? onCleared }) {
     return ListTile(
