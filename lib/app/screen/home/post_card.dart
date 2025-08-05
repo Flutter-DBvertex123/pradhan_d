@@ -577,7 +577,28 @@ if(userModel ==null){
                                           if (userModel!
                                                   .affiliateText.isNotEmpty &&
                                               !userModel!.isOrganization)
-                                            Container(
+                                            Flexible(
+                                              child: Container(
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: 10.w,
+                                                  vertical: 1.w,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.grey.shade300,
+                                                  borderRadius: BorderRadius.circular(20),
+                                                ),
+                                                child: Text(
+                                                  userModel!.affiliateText,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  maxLines: 1,
+                                                  softWrap: true,
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            /*Container(
                                               padding: EdgeInsets.symmetric(
                                                 horizontal: 10.w,
                                                 vertical: 1.w,
@@ -593,7 +614,7 @@ if(userModel ==null){
                                                   fontSize: 12,
                                                 ),
                                               ),
-                                            ),
+                                            ),*/
                                         ],
                                       ),
                                       SizedBox(

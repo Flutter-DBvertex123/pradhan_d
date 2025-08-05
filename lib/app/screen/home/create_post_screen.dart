@@ -292,8 +292,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   Widget _createOptionTiles() {
     return Obx(() => Column(
       children: [
-        _createOptionTile(
-            title: 'Select level',
+        _createAreaOptionTile(
+            title: 'Select Your Area',
             subtitle: createPostController.selectedLevel.value,
             icon: Icons.edit_location_alt_outlined,
             onPressed: _showLevelSelector,
@@ -415,6 +415,15 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
       contentPadding: EdgeInsets.symmetric(horizontal: 26.w, vertical: 4.w),
       leading: Icon(icon, color: AppColors.black),
       title: Text(title),
+      subtitle: subtitle == null ? null : Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey)),
+      trailing: enableClearButton ? IconButton(onPressed: onCleared, icon: Icon(Icons.clear)) : null,
+    );
+  }_createAreaOptionTile({ required String title, String? subtitle, required IconData icon, VoidCallback? onPressed, bool enableClearButton = false, VoidCallback? onCleared }) {
+    return ListTile(
+      onTap: onPressed,
+      contentPadding: EdgeInsets.symmetric(horizontal: 26.w, vertical: 4.w),
+      leading: Icon(icon, color: AppColors.black),
+      title: Text(title,style : TextStyle(color:AppColors.primaryColor)),
       subtitle: subtitle == null ? null : Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey)),
       trailing: enableClearButton ? IconButton(onPressed: onCleared, icon: Icon(Icons.clear)) : null,
     );

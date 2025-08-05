@@ -818,7 +818,25 @@ Widget _createPradhanTile(Map<String, dynamic> pradhaan) {
     title: Text(
       pradhaan['pradhan']['name'].isEmpty ? 'Admin' : pradhaan['pradhan']['name'],
     ),
-    subtitle: Text('Earning: Rs ${pradhaan['amount'].toStringAsFixed(2)}'),
+    subtitle: Row(
+      children: [
+        Text(
+          'Earning:',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+        SizedBox(width: 4), // Optional spacing
+        Text(
+          'Rs ${pradhaan['amount'].toStringAsFixed(2)}',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.black87,
+          ),
+        ),
+      ],
+    ),
     trailing: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
