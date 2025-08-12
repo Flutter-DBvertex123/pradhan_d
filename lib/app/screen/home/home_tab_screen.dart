@@ -735,7 +735,7 @@ class _HomeTabScreenState extends State<HomeTabScreen>
                                                   ((isPradhaanAtHisLevel ??
                                                       false)
                                                       ? ' - Pradhaan'
-                                                      : '-N/A'),
+                                                      : ''),
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 16,
@@ -761,7 +761,7 @@ class _HomeTabScreenState extends State<HomeTabScreen>
                                           _buildExitDialogDataRow('Votes:',
                                               value: upvotesReceived
                                                   .toString()),
-                                          _buildExitDialogDataRow('Fund Raised',
+                                          _buildExitDialogDataRow('Revenue Raised',
                                               value:
                                               "₹${revenue.toStringAsFixed(1)}"),
                                           // _buildExitDialogDataRow('Free Auto Fund',

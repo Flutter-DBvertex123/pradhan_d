@@ -151,7 +151,7 @@ class _DownloadPradhaanCardScreenState
                                   widget.userLevelLocation +
                                       (widget.isPradhaanAtHisLevel
                                           ? ' - Pradhaan'
-                                          : '-N/A'),
+                                          : ''),
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 18,
@@ -161,7 +161,7 @@ class _DownloadPradhaanCardScreenState
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              _buildExitDialogDataRow(
+                             /* _buildExitDialogDataRow(
                                 'Designation:',
                                 valueWidget: Text(widget.designation,
                                   style: TextStyle(
@@ -172,13 +172,13 @@ class _DownloadPradhaanCardScreenState
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                              ),
+                              ),*/
                               _buildExitDialogDataRow(
                                 'Votes:',
                                 value: widget.votesReceived.toString(),
                               ),
                               _buildExitDialogDataRow(
-                                'Fund Raised',
+                                'Revenue Raised',
                                 // value: widget.fundsRaised.toString(),
                                 value: double.parse(widget.fundsRaised.toString()).toStringAsFixed(2),
                               ),
