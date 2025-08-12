@@ -1,14 +1,4 @@
 
-
-
-
-
-
-
-
-
-
-
 import 'dart:convert';
 import 'package:chunaw/app/controller/auth/profile_process_controller.dart';
 import 'package:chunaw/app/controller/location_features/pradhan_vote_controller.dart';
@@ -75,7 +65,7 @@ class _VotePradhanScreenState extends State<VotePradhanScreen> {
   }
   LocationModel? selectedPref;
 //Getting Home location of user for identify area level locations
-  Future<List<LocationModel>?> getUserCurrentLocationPref() async {
+ /* Future<List<LocationModel>?> getUserCurrentLocationPref() async {
     prefElectionLoc = json.decode(preferedElectionLocation);
     final state = getPrefValue(Keys.STATE);
     final country = getPrefValue(Keys.COUNTRY);
@@ -97,7 +87,7 @@ class _VotePradhanScreenState extends State<VotePradhanScreen> {
     }else{
       return  await LocationService.getCountry();
     }
-  }
+  }*/
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -226,7 +216,26 @@ class _VotePradhanScreenState extends State<VotePradhanScreen> {
 
             );
         } else {
-          return Row(
+          return AppButtonOutlined(
+            onPressed: () async {
+              await UserService.updateUserWithGivenFields(
+                userId: getPrefValue(Keys.USERID),
+                data: {
+                  'preferred_election_location': {
+                    'id': widget.locationId,
+                    'name': widget.locationName,
+                    'text': widget.locationText,
+                  }
+                },
+                navigateToHomeAfterUpdate: false,
+              );
+
+              welcomeController.getTopTenPosts(
+                  locationText: widget.locationText, level: widget.level);
+            },
+            buttonText: 'Fight election from this location',
+          );
+          /*Row(
             mainAxisAlignment: MainAxisAlignment.center,
             spacing: 15,
             children: [
@@ -307,7 +316,7 @@ class _VotePradhanScreenState extends State<VotePradhanScreen> {
                     ),
                   ),
                 ),
-                /*AppButtonOutlined(
+                *//*AppButtonOutlined(
                   onPressed: () async {
                     await UserService.updateUserWithGivenFields(
                       userId: getPrefValue(Keys.USERID),
@@ -325,7 +334,7 @@ class _VotePradhanScreenState extends State<VotePradhanScreen> {
                         locationText: widget.locationText, level: widget.level);
                   },
                   buttonText: 'Fight election from this location',
-                ),*/
+                ),*//*
               ),
               OutlinedButton(
                 style: ButtonStyle(
@@ -359,7 +368,7 @@ class _VotePradhanScreenState extends State<VotePradhanScreen> {
                 ),
               ),
             ],
-          );
+          );*/
         }
       },
     );

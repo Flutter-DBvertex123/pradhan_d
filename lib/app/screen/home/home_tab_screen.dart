@@ -68,8 +68,8 @@ class _HomeTabScreenState extends State<HomeTabScreen>
   }
   String getLevelName(dynamic pradhan) {
     if (pradhan == null) return 'N/A';
-
     final level = pradhan['level'];
+    print('dss :- level $level');
     switch (level) {
       case 1:
         return 'Ward-Pradhaan';
@@ -745,7 +745,7 @@ class _HomeTabScreenState extends State<HomeTabScreen>
                                               overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
-                                          _buildExitDialogDataRow(
+                                         /* _buildExitDialogDataRow(
                                             'Designation',
                                             valueWidget: Text(
                                               getLevelName(pradhan),
@@ -757,7 +757,7 @@ class _HomeTabScreenState extends State<HomeTabScreen>
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                             ),
-                                          ),
+                                          ),*/
                                           _buildExitDialogDataRow('Votes:',
                                               value: upvotesReceived
                                                   .toString()),

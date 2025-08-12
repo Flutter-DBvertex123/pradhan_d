@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chunaw/app/dbvertex/organisations/organisation_screen.dart';
 import 'package:chunaw/app/dbvertex/promoters_screen.dart';
 import 'package:chunaw/app/screen/admin/location_admin.dart';
+import 'package:chunaw/app/screen/home/select_election_location.dart';
 import 'package:chunaw/app/screen/home/select_states_screen.dart';
 import 'package:chunaw/app/service/collection_name.dart';
 import 'package:chunaw/app/service/firebase_service.dart';
@@ -144,10 +145,8 @@ class AppDrawer extends StatelessWidget {
                   minLeadingWidth: 10,
                   title: Text("Groups"),
                   subtitle: Text("College, Ward, NGO, Union etc"),
-                  subtitleTextStyle: TextStyle(
-                    color: Colors.grey[500],
-                    fontSize: 13
-                  ),
+                  subtitleTextStyle:
+                      TextStyle(color: Colors.grey[500], fontSize: 13),
                   onTap: () async {
                     final updated = await Navigator.of(context).push(
                       MaterialPageRoute(
@@ -251,6 +250,25 @@ class AppDrawer extends StatelessWidget {
                       ),
                     );
 
+                    if (updated && onStatePreferenceUpdated != null) {
+                      onStatePreferenceUpdated!();
+                    }
+                  },
+                ),
+                ListTile(
+                  leading: Padding(
+                    padding: const EdgeInsets.only(left: 2.0),
+                    child: Icon(Icons.where_to_vote_outlined, size: 25),
+                  ),
+                  dense: false,
+                  minLeadingWidth: 10,
+                  title: Text("Select Election Location"),
+                  onTap: () async {
+                    final updated = await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => SelectElectionLocation(),
+                      ),
+                    );
                     if (updated && onStatePreferenceUpdated != null) {
                       onStatePreferenceUpdated!();
                     }
