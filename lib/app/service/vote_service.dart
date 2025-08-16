@@ -209,6 +209,7 @@ class VoteService {
             .update({
           "upvote_count": FieldValue.increment(1),
           "oneday_vote": FieldValue.increment(1),
+          "weekly_vote": FieldValue.increment(1)
         }),
         FirebaseFirestore.instance
             .collection(POST_DB)
@@ -246,6 +247,7 @@ class VoteService {
             .doc(upvoteModel.postUserId)
             .update({
           "upvote_count": FieldValue.increment(1),
+          "weekly_vote": FieldValue.increment(1)
           // "oneday_vote": FieldValue.increment(1),
         }),
       ]);
@@ -276,6 +278,7 @@ class VoteService {
         FirebaseFirestore.instance.collection(USER_DB).doc(postUserId).update({
           "upvote_count": FieldValue.increment(-1),
           "oneday_vote": FieldValue.increment(-1),
+          "weekly_vote": FieldValue.increment(-1),
         }),
         FirebaseFirestore.instance
             .collection(POST_DB)
@@ -316,6 +319,7 @@ class VoteService {
             .delete(),
         FirebaseFirestore.instance.collection(USER_DB).doc(userId).update({
           "upvote_count": FieldValue.increment(-1),
+          "weekly_vote": FieldValue.increment(-1)
         }),
       ]);
       return true;

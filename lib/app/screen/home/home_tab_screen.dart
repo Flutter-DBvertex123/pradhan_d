@@ -464,7 +464,6 @@ class _HomeTabScreenState extends State<HomeTabScreen>
                     AppRoutes.navigateToLogin(removeGuestLogin: true);
                     return;
                   }
-                  print('dss : - ${Timestamp.now()}');
                   //final int? navigateTo = await AppRoutes.navigateToAddPost();
                   final int? navigateTo =  await AppRoutes.navigateToAddPost();
                   //print('navigate to: $navigateTo');

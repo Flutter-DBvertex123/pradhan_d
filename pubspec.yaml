@@ -5,14 +5,13 @@ description: A new Flutter project.
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.43+44
+version: 1.0.44+45
 
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
-  firebase_app_check: ^0.3.2+9
   adaptive_action_sheet: ^2.0.2
   cached_network_image: ^3.2.3
   chewie: ^1.7.4
@@ -53,9 +52,7 @@ dependencies:
   url_launcher: ^6.2.1
   uuid: ^4.4.0
   video_player: ^2.7.2
-  #video_trimmer: ^2.0.0
   visibility_detector: ^0.4.0+2
-
   razorpay_flutter: ^1.4.0
   intl: ^0.17.0
   cloud_functions: ^5.3.2
@@ -68,9 +65,7 @@ dependencies:
 
   permission_handler: ^11.3.1
 
-#  firebase_dynamic_links: ^6.1.5
-#  firebase_analytics: ^11.4.5
-#  videfluo_trimmer: ^0.6.0
+
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1

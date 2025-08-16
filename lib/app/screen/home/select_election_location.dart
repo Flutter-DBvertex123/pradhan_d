@@ -1,5 +1,6 @@
 
 import 'package:chunaw/app/controller/home/welcome_location_controller.dart';
+import 'package:chunaw/app/widgets/app_toast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -150,6 +151,8 @@ print('dss :- level of user $level');
                       },
                       navigateToHomeAfterUpdate: false,
                     );
+                  }else{
+                    longToastMessage('Please Select Location');
                   }
                 },
                 buttonText: "Continue",

@@ -376,7 +376,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                                                     ) else
                                                     Container(
                                                       decoration: BoxDecoration(
-                                                          color: Colors.black54,
+                                                          //color: Colors.black54,
                                                           borderRadius: BorderRadius.circular(4)
                                                       ),
 
@@ -418,8 +418,44 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
                                                             // Fetch the data
                                                             final mapData = snapshot.data!.data() as Map<String, dynamic>? ?? {};
+                                                            return Row(
+                                                              spacing: 3,
+                                                              children: [
+                                                            Container(
+                                                              decoration: BoxDecoration(
+                                                                color: Colors.black54,
+                                                                borderRadius: BorderRadius.circular(4)),
+                                                              padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                                                              child: Text(
+                                                              '${mapData['upvote_count'] ?? 0} Votes',
+                                                                style: TextStyle(
+                                                                  fontSize: 11,
+                                                                  color: Colors.white,
+                                                                  fontWeight: FontWeight.w500,
+                                                                ),
+                                                                maxLines: 1,
+                                                                overflow: TextOverflow.ellipsis,
+                                                              ),
+                                                            ),Container(
+                                                                  decoration: BoxDecoration(
+                                                                      color: Colors.black54,
+                                                                      borderRadius: BorderRadius.circular(4)),
+                                                                  padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                                                              child: Text(
+                                                              '${mapData['weekly_vote'] ?? 0} Weekly Votes',
+                                                                style: TextStyle(
+                                                                  fontSize: 11,
+                                                                  color: Colors.white,
+                                                                  fontWeight: FontWeight.w500,
+                                                                ),
+                                                                maxLines: 1,
+                                                                overflow: TextOverflow.ellipsis,
+                                                              ),
+                                                            ),
+                                                              ],
+                                                            );
 
-                                                            return Text(
+                                                            /*return Text(
                                                               '${mapData['upvote_count'] ?? 0} Votes',
                                                               style: TextStyle(
                                                                 fontSize: 11,
@@ -428,7 +464,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                                                               ),
                                                               maxLines: 1,
                                                               overflow: TextOverflow.ellipsis,
-                                                            );
+                                                            );*/
                                                           },
                                                         ),
                                                       ),

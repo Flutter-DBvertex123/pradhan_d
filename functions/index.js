@@ -2548,6 +2548,68 @@ pradhan_details: {
 
 
 //////****************** */
+/*
+exports.resetVote = functions.https.onRequest(async (req, res) => {
+try {
+        const snapshot = await admin.firestore().collection("users").get();
+
+        let batch = admin.firestore().batch();
+        let counter = 0;
+
+        for (const doc of snapshot.docs) {
+          batch.update(doc.ref, { weekly_vote: 0 });
+          counter++;
+
+          if (counter === 500) {
+            await batch.commit();
+            console.log(`✅ Committed 500 docs`);
+            batch = admin.firestore().batch();
+            counter = 0;
+          }
+        }
+
+        if (counter > 0) {
+          await batch.commit();
+          console.log(`✅ Committed remaining ${counter} docs`);
+        }
+        const afterReset = await admin.firestore()
+              .collection('users')
+              .doc('docid')
+              .get();
+              console.log('dada');
+            return res.status(200).send({
+              message: `weekly votes of ${afterReset.data()?.weekly_vote}`
+            });
+
+      } catch (error) {
+        console.error(error);
+        return res.status(500).send({ error: error.message });
+      }
+});
+exports.setvVote = functions.https.onRequest(async (req, res) => {
+try {
+        await admin.firestore()
+          .collection("users")
+          .doc("TrBiVPQ8KqYLkxZNqwvQcM1CFLr1")
+          .set({
+            weekly_vote: 10,
+          });
+         let vote =  await admin.firestore()
+                        .collection('users')
+                        .doc('docid')
+                        .get();
+                        console.log('dada');
+                      return res.status(200).send({
+                        message: `weekly votes of ${vote.data()?.weekly_vote}`
+                      });
+
+      } catch (error) {
+        console.error(error);
+        return res.status(500).send({ error: error.message });
+      }
+});
+*/
+
 exports.calculatePayments = functions.runWith({ timeoutSeconds: 540, memory: '2GB' }).https.onRequest(async (req, res) => {
   // Creates start of week to fetch this week's all views
   const today = new Date();
@@ -2640,6 +2702,33 @@ exports.calculatePayments = functions.runWith({ timeoutSeconds: 540, memory: '2G
       console.log(`No pradhan or votes for scope ${scopeId}, skipping`);
       return [scopeId, new Map()];
     }
+    //Reset weekly votes
+      try {
+        const snapshot = await admin.firestore().collection("users").get();
+
+        let batch = admin.firestore().batch();
+        let counter = 0;
+
+        for (const doc of snapshot.docs) {
+          batch.update(doc.ref, { weekly_vote: 0 });
+          counter++;
+
+          if (counter === 500) {
+            await batch.commit();
+            console.log(`✅ Committed 500 docs`);
+            batch = admin.firestore().batch();
+            counter = 0;
+          }
+        }
+
+        if (counter > 0) {
+          await batch.commit();
+          console.log(`✅ Committed remaining ${counter} docs`);
+        }
+      } catch (error) {
+        console.error(error);
+        return res.status(500).send({ error: error.message });
+      }
 
     // Validate totalAmount
     if (totalAmount <= 0) {
@@ -2804,7 +2893,9 @@ async function getScopeTree(scopeId, level, allPradhans) {
     const id = ref.id;
     const pradhanDoc = allPradhans.find(p => p.id === id);
     if (pradhanDoc) {
-      const votes = pradhanDoc.data()?.pradhan_model?.upvote_count || 0;
+    //Getting weekly vote instead of upvote_count to distribute amount on the basis weekly votes
+      //const votes = pradhanDoc.data()?.pradhan_model?.upvote_count || 0;
+      const votes = pradhanDoc.data()?.pradhan_model?.weekly_vote || 0;
       result.set(id, votes);
     }
 

@@ -4,9 +4,6 @@ import 'package:chunaw/app/utils/app_assets.dart';
 import 'package:chunaw/app/utils/app_colors.dart';
 import 'package:chunaw/app/utils/app_pref.dart';
 import 'package:chunaw/app/utils/app_string.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
-// import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -15,14 +12,9 @@ import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'app/test.dart';
 import 'firebase_options.dart';
-import 'package:firebase_app_check/firebase_app_check.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  /*await FirebaseAppCheck.instance.activate(
-    androidProvider: AndroidProvider.debug,
-    appleProvider: AppleProvider.debug,
-  );*/
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
