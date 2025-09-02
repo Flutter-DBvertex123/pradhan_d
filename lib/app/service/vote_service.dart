@@ -44,19 +44,20 @@ class VoteService {
       // if the user doesn't prefer this location, then check whether the location and level matches or not
       final baseQuery = FirebaseFirestore.instance
           .collection(USER_DB)
-          .where(
-            Filter.or(
-              Filter(
-                'preferred_election_location.text',
-                isEqualTo: locationText,
-              ),
-              Filter.and(
-                Filter(locQuery, isEqualTo: locationText),
-                Filter('level', isEqualTo: level),
-              ),
-            ),
-          )
-          .orderBy("upvote_count", descending: true);
+          .where( Filter.and(
+        Filter(locQuery, isEqualTo: locationText),
+        Filter('level', isEqualTo: level),
+            // Filter.or(
+            //   Filter(
+            //     'preferred_election_location.text',
+            //     isEqualTo: locationText,
+            //   ),
+            //   Filter.and(
+            //     Filter(locQuery, isEqualTo: locationText),
+            //     Filter('level', isEqualTo: level),
+            //   ),
+            // ),
+          )).orderBy("weekly_vote", descending: true);
 
       List<UserModel> users = [];
 
@@ -115,7 +116,7 @@ class VoteService {
           break;
         }
       }
-
+      print('dss :- top users ${users[0]}');
       // return only the first 10 results
       return users.sublist(0, min(users.length, 10));
     } catch (e) {

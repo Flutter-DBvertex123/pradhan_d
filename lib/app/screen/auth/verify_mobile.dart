@@ -71,13 +71,16 @@ class VerifyMobile extends StatelessWidget {
             ),
             SizedBox(height: 34),
             Center(
-              child: Text(
-                'Resend Code',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: AppColors.primaryColor,
-                  decoration: TextDecoration.underline,
-                  fontWeight: FontWeight.w500,
+              child: InkWell(
+                onTap: (){},
+                child: Text(
+                  'Resend Code',
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: AppColors.primaryColor,
+                    decoration: TextDecoration.underline,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ),

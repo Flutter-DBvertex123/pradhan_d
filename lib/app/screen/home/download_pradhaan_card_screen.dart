@@ -161,7 +161,7 @@ class _DownloadPradhaanCardScreenState
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                             /* _buildExitDialogDataRow(
+                              _buildExitDialogDataRow(
                                 'Designation:',
                                 valueWidget: Text(widget.designation,
                                   style: TextStyle(
@@ -172,7 +172,7 @@ class _DownloadPradhaanCardScreenState
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                              ),*/
+                              ),
                               _buildExitDialogDataRow(
                                 'Votes:',
                                 value: widget.votesReceived.toString(),

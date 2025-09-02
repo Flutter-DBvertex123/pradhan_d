@@ -20,7 +20,6 @@ class WelcomeLocationController extends GetxController {
 
   getPradhanId(String docId) async {
     isStatusLoading.value = true;
-
     final results = await PradhanService.fetchPradhanData(docId: docId);
     pradhanId.value = results.pradhanId;
     Get.forceAppUpdate();

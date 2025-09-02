@@ -743,20 +743,23 @@ class _HomeTabScreenState extends State<HomeTabScreen>
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                             ),
-                                          ),
-                                         /* _buildExitDialogDataRow(
-                                            'Designation',
-                                            valueWidget: Text(
-                                              getLevelName(pradhan),
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16,
-                                                color: AppColors.primaryColor,
+                                          ),(pradhan?["level"] == null || pradhan?["level"].isEmpty ) ?
+                                           SizedBox()
+                                          :_buildExitDialogDataRow(
+                                              'Designation',
+                                              valueWidget: Text(
+                                                getLevelName(pradhan),
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16,
+                                                  color: AppColors.primaryColor,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
                                             ),
-                                          ),*/
+
+
                                           _buildExitDialogDataRow('Votes:',
                                               value: upvotesReceived
                                                   .toString()),

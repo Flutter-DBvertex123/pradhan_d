@@ -146,7 +146,7 @@ class _UserCardState extends State<UserCard> {
                         // grabbing the data
                         final votes = snapshot.data == null
                             ? 0
-                            : snapshot.data.data()['upvote_count'];
+                            : snapshot.data.data()['weekly_vote'];
 
                         return Text(
                           "$votes Votes",
