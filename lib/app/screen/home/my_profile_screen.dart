@@ -324,10 +324,14 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                                                         BorderRadius.circular(
                                                             20),
                                                   ),
-                                                  child: Text(
-                                                    userModel!.affiliateText,
-                                                    style: TextStyle(
-                                                      fontSize: 12,
+                                                  child: ConstrainedBox(
+                                                    constraints: BoxConstraints(maxWidth: 200),
+                                                    child: Text(
+                                                      softWrap: true,
+                                                      userModel!.affiliateText,
+                                                      style: TextStyle(
+                                                        fontSize: 12,
+                                                    ),
                                                     ),
                                                   ),
                                                 ),
@@ -371,101 +375,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                                                               'Montserrat',
                                                           height: 1,
                                                           color: Colors.white,
-                                                        ),
-                                                      ),
-                                                    ) else
-                                                    Container(
-                                                      decoration: BoxDecoration(
-                                                          //color: Colors.black54,
-                                                          borderRadius: BorderRadius.circular(4)
-                                                      ),
-
-                                                      child: Padding(
-                                                        // Added padding for better spacing inside the card
-                                                        padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
-                                                        child: StreamBuilder<
-                                                            DocumentSnapshot>(
-                                                          stream: FirebaseFirestore.instance.collection(USER_DB).doc(userModel!.id).snapshots(),
-                                                          builder: (context, snapshot) {
-                                                            // Display a loading spinner when data is loading
-                                                            if (snapshot.connectionState == ConnectionState.waiting) {
-                                                              return Center(
-                                                                  child: Text(
-                                                                    'Fetching...',
-                                                                    style: TextStyle(
-                                                                        fontSize:
-                                                                        12,
-                                                                        color: Colors
-                                                                            .white),
-                                                                  )
-                                                              );
-                                                            }
-                                                            if (snapshot
-                                                                .hasError ||
-                                                                !snapshot
-                                                                    .hasData ||
-                                                                snapshot.data ==
-                                                                    null) {
-                                                              return Text(
-                                                                'Something went wrong!',
-                                                                style: TextStyle(
-                                                                    fontSize:
-                                                                    12,
-                                                                    color: Colors
-                                                                        .white),
-                                                              );
-                                                            }
-
-                                                            // Fetch the data
-                                                            final mapData = snapshot.data!.data() as Map<String, dynamic>? ?? {};
-                                                            return Row(
-                                                              spacing: 3,
-                                                              children: [
-                                                            Container(
-                                                              decoration: BoxDecoration(
-                                                                color: Colors.black54,
-                                                                borderRadius: BorderRadius.circular(4)),
-                                                              padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
-                                                              child: Text(
-                                                              '${mapData['upvote_count'] ?? 0} Votes',
-                                                                style: TextStyle(
-                                                                  fontSize: 11,
-                                                                  color: Colors.white,
-                                                                  fontWeight: FontWeight.w500,
-                                                                ),
-                                                                maxLines: 1,
-                                                                overflow: TextOverflow.ellipsis,
-                                                              ),
-                                                            ),Container(
-                                                                  decoration: BoxDecoration(
-                                                                      color: Colors.black54,
-                                                                      borderRadius: BorderRadius.circular(4)),
-                                                                  padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
-                                                              child: Text(
-                                                              '${mapData['weekly_vote'] ?? 0} Weekly Votes',
-                                                                style: TextStyle(
-                                                                  fontSize: 11,
-                                                                  color: Colors.white,
-                                                                  fontWeight: FontWeight.w500,
-                                                                ),
-                                                                maxLines: 1,
-                                                                overflow: TextOverflow.ellipsis,
-                                                              ),
-                                                            ),
-                                                              ],
-                                                            );
-
-                                                            /*return Text(
-                                                              '${mapData['upvote_count'] ?? 0} Votes',
-                                                              style: TextStyle(
-                                                                fontSize: 11,
-                                                                color: Colors.white,
-                                                                fontWeight: FontWeight.w500,
-                                                              ),
-                                                              maxLines: 1,
-                                                              overflow: TextOverflow.ellipsis,
-                                                            );*/
-                                                          },
                                                         ),
                                                       ),
                                                     )
@@ -530,7 +439,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                                                   SizedBox(
                                                     width: 10.w,
                                                   ),
-
 
                                                   // Container(
                                                   //   width: 120,
@@ -615,6 +523,198 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                                                   // ),
                                                 ],
                                               ),
+                                              /*Container(
+                                                decoration: BoxDecoration(
+                                                  //color: Colors.black54,
+                                                    borderRadius: BorderRadius.circular(4)
+                                                ),
+
+                                                child: Padding(
+                                                  // Added padding for better spacing inside the card
+                                                  padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                                                  child: StreamBuilder<
+                                                      DocumentSnapshot>(
+                                                    stream: FirebaseFirestore.instance.collection(USER_DB).doc(userModel!.id).snapshots(),
+                                                    builder: (context, snapshot) {
+                                                      // Display a loading spinner when data is loading
+                                                      if (snapshot.connectionState == ConnectionState.waiting) {
+                                                        return Center(
+                                                            child: Text(
+                                                              'Fetching...',
+                                                              style: TextStyle(
+                                                                  fontSize:
+                                                                  12,
+                                                                  color: Colors
+                                                                      .white),
+                                                            )
+                                                        );
+                                                      }
+                                                      if (snapshot
+                                                          .hasError ||
+                                                          !snapshot
+                                                              .hasData ||
+                                                          snapshot.data ==
+                                                              null) {
+                                                        return Text(
+                                                          'Something went wrong!',
+                                                          style: TextStyle(
+                                                              fontSize:
+                                                              12,
+                                                              color: Colors
+                                                                  .white),
+                                                        );
+                                                      }
+
+                                                      // Fetch the data
+                                                      final mapData = snapshot.data!.data() as Map<String, dynamic>? ?? {};
+                                                      return Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        spacing: 3,
+                                                        children: [
+                                                          Container(
+                                                            decoration: BoxDecoration(
+                                                                color: Colors.black54,
+                                                                borderRadius: BorderRadius.circular(4)),
+                                                            padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                                                            child: Text(
+                                                              '${mapData['upvote_count'] ?? 0} Votes',
+                                                              style: TextStyle(
+                                                                fontSize: 11,
+                                                                color: Colors.white,
+                                                                fontWeight: FontWeight.w500,
+                                                              ),
+                                                              maxLines: 1,
+                                                              overflow: TextOverflow.ellipsis,
+                                                            ),
+                                                          ),Container(
+                                                            decoration: BoxDecoration(
+                                                                color: Colors.black54,
+                                                                borderRadius: BorderRadius.circular(4)),
+                                                            padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                                                            child: Text(
+                                                              '${mapData['weekly_vote'] ?? 0} Weekly Votes',
+                                                              style: TextStyle(
+                                                                fontSize: 11,
+                                                                color: Colors.white,
+                                                                fontWeight: FontWeight.w500,
+                                                              ),
+                                                              maxLines: 1,
+                                                              overflow: TextOverflow.ellipsis,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      );
+
+                                                      *//*return Text(
+                                                              '${mapData['upvote_count'] ?? 0} Votes',
+                                                              style: TextStyle(
+                                                                fontSize: 11,
+                                                                color: Colors.white,
+                                                                fontWeight: FontWeight.w500,
+                                                              ),
+                                                              maxLines: 1,
+                                                              overflow: TextOverflow.ellipsis,
+                                                            );*//*
+                                                    },
+                                                  ),
+                                                ),
+                                              )*/
+                                              Container(
+                                                decoration: BoxDecoration(
+                                                  //color: Colors.black54,
+                                                    borderRadius: BorderRadius.circular(4)
+                                                ),
+
+                                                child: Padding(
+                                                  // Added padding for better spacing inside the card
+                                                  padding: const EdgeInsets.symmetric(vertical: 4),
+                                                  child: StreamBuilder<
+                                                      DocumentSnapshot>(
+                                                    stream: FirebaseFirestore.instance.collection(USER_DB).doc(userModel!.id).snapshots(),
+                                                    builder: (context, snapshot) {
+                                                      // Display a loading spinner when data is loading
+                                                      if (snapshot.connectionState == ConnectionState.waiting) {
+                                                        return Center(
+                                                            child: Text(
+                                                              'Fetching...',
+                                                              style: TextStyle(
+                                                                  fontSize:
+                                                                  12,
+                                                                  color: Colors
+                                                                      .white),
+                                                            )
+                                                        );
+                                                      }
+                                                      if (snapshot
+                                                          .hasError ||
+                                                          !snapshot
+                                                              .hasData ||
+                                                          snapshot.data ==
+                                                              null) {
+                                                        return Text(
+                                                          'Something went wrong!',
+                                                          style: TextStyle(
+                                                              fontSize:
+                                                              12,
+                                                              color: Colors
+                                                                  .white),
+                                                        );
+                                                      }
+
+                                                      // Fetch the data
+                                                      final mapData = snapshot.data!.data() as Map<String, dynamic>? ?? {};
+                                                      return Row(
+                                                        //crossAxisAlignment: CrossAxisAlignment.start,
+                                                        spacing: 3,
+                                                        children: [
+                                                          Container(
+                                                            decoration: BoxDecoration(
+                                                                color: Colors.black54,
+                                                                borderRadius: BorderRadius.circular(4)),
+                                                            padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                                                            child: Text(
+                                                              '${mapData['upvote_count'] ?? 0} Votes',
+                                                              style: TextStyle(
+                                                                fontSize: 11,
+                                                                color: Colors.white,
+                                                                fontWeight: FontWeight.w500,
+                                                              ),
+                                                              maxLines: 1,
+                                                              overflow: TextOverflow.ellipsis,
+                                                            ),
+                                                          ),Container(
+                                                            decoration: BoxDecoration(
+                                                                color: Colors.black54,
+                                                                borderRadius: BorderRadius.circular(4)),
+                                                            padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                                                            child: Text(
+                                                              '${mapData['weekly_vote'] ?? 0} Weekly Votes',
+                                                              style: TextStyle(
+                                                                fontSize: 11,
+                                                                color: Colors.white,
+                                                                fontWeight: FontWeight.w500,
+                                                              ),
+                                                              maxLines: 1,
+                                                              overflow: TextOverflow.ellipsis,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      );
+
+                                                      /*return Text(
+                                                              '${mapData['upvote_count'] ?? 0} Votes',
+                                                              style: TextStyle(
+                                                                fontSize: 11,
+                                                                color: Colors.white,
+                                                                fontWeight: FontWeight.w500,
+                                                              ),
+                                                              maxLines: 1,
+                                                              overflow: TextOverflow.ellipsis,
+                                                            );*/
+                                                    },
+                                                  ),
+                                                ),
+                                              )
                                             ],
                                           ),
                                     Flexible(

@@ -743,7 +743,8 @@ class _HomeTabScreenState extends State<HomeTabScreen>
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                             ),
-                                          ),(pradhan?["level"] == null || pradhan?["level"].isEmpty ) ?
+                                          ),//(pradhan?["level"] == null || pradhan?["level"].isEmpty ) ?
+                                          (pradhan?["level"] == null || pradhan?["level"] == 0) ?
                                            SizedBox()
                                           :_buildExitDialogDataRow(
                                               'Designation',

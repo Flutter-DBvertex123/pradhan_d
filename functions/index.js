@@ -1510,7 +1510,7 @@ exports.capturePayment = functions.https.onCall(async (data, context) => {
 
 
 exports.getRandomAd = functions.https.onCall(async (data, context) => {
-  const scope = data.scope || [];
+const scope = data.scope || [];
   const uid = context.auth?.uid;
 
   if (!uid) {
@@ -1543,13 +1543,18 @@ exports.getRandomAd = functions.https.onCall(async (data, context) => {
     }
 
     console.log("[INFO] Viewed Ad IDs:", viewsAdIds);
-
+    const preCheck = await admin.firestore()
+            .collection("ads")
+            .where("scope", "array-contains-any", scope)
+            .where("uid", "!=", uid)
+            .get();
+          console.log("[DEBUG] Total ads before randomness:", preCheck.docs.map(d => d.id));
     // Initial Query
     const query = admin.firestore()
       .collection("ads")
       .where("scope", "array-contains-any", scope)
-      .where("uid", "!=", uid)
-      .where("randomness", ">=", randomValue);
+      .where("uid", "!=", uid);
+      //.where("randomness", ">=", randomValue);
 
     let result = await query.get();
     let documents = result.docs.map(doc => doc.data());
@@ -1563,8 +1568,8 @@ exports.getRandomAd = functions.https.onCall(async (data, context) => {
       const fallbackQuery = admin.firestore()
         .collection("ads")
         .where("scope", "array-contains-any", scope)
-        .where("uid", "!=", uid)
-        .where("randomness", "<", randomValue);
+        .where("uid", "!=", uid);
+        //.where("randomness", "<", randomValue);
 
       const fallbackResult = await fallbackQuery.get();
       documents = fallbackResult.docs.map(doc => doc.data());
@@ -1577,6 +1582,9 @@ exports.getRandomAd = functions.https.onCall(async (data, context) => {
       const isValid = ad.uid != uid &&
         (ad.target_views || 0) > (ad.generated_views || 0) &&
         !viewsAdIds.includes(ad.id);
+      /*ad.uid != uid &&
+        (ad.target_views || 0) > (ad.generated_views || 0) &&
+        !viewsAdIds.includes(ad.id);*/
 
       console.log("[FILTER] Checking ad:", ad.id, {
         title: ad.title,
@@ -1630,26 +1638,6 @@ exports.getRandomAd = functions.https.onCall(async (data, context) => {
   }
 });
 
-exports.updateVotingKeys = functions.https.onRequest(async (req, res) => {
-  try {
-    const collectionRef = admin.firestore().collection('pradhan');
-
-    const snapshot = await collectionRef.get();
-    const batch = admin.firestore().batch();
-
-    snapshot.forEach((doc) => {
-      const newVotingValue = !doc.data().voting;
-      batch.update(doc.ref, { voting: newVotingValue });
-    });
-
-    await batch.commit();
-
-    res.status(200).send('Voting keys updated.');
-  } catch (error) {
-    console.error('Error updating voting keys:', error);
-    res.status(500).send('An error occurred while updating voting keys.');
-  }
-});
 
 exports.updateVoteableCounts = functions.https.onRequest(async (req, res) => {
   try {
@@ -3403,181 +3391,6 @@ function getTopUser(users) {
     curr.weekly_vote > prev.weekly_vote ? curr : prev
   );
 }
-/*
-exports.sendToNextLevel = functions.https.onRequest(async (req, res) => {
-  const isEmulator = process.env.FUNCTIONS_EMULATOR === "true";
-  const db = admin.firestore();
-//
-//  let allUsers;
-//  if (isEmulator) {
-//    console.log("⚡ Using local weekly_vote.json for testing...");
-//    allUsers = weeklyVotes;
-//  } else {
-//    const snapshot = await db.collection("users").get();
-//    allUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-//  }
-
-  */
-/* ========== 1. Postal → City ========== *//*
-
-  const postalGroups = {};
-  allUsers.forEach(u => {
-    if (u.level === 1) {
-      if (!postalGroups[u.postalID]) postalGroups[u.postalID] = [];
-      postalGroups[u.postalID].push(u);
-    }
-  });
-
-  for (const [postalId, users] of Object.entries(postalGroups)) {
-    const topPostal = getTopUser(users);
-    if (!topPostal) continue;
-
-    const cityUser = allUsers.find(u =>
-      u.level === 2 &&
-      u.cityID === topPostal.cityID &&
-      u.postalID === postalId
-    );
-
-    if (cityUser) {
-      if (topPostal.weekly_vote > cityUser.weekly_vote) {
-        if (isEmulator) {
-          console.log(
-            `🏆 Postal→City: ${topPostal.id} (votes: ${topPostal.weekly_vote}, from state: ${topPostal.stateID}, postal: ${topPostal.postalID}) promoted, ` +
-            `${cityUser.id} (votes: ${cityUser.weekly_vote}, from state: ${cityUser.stateID}, city: ${cityUser.cityID}) demoted`
-          );
-        } else {
-          await db.collection("users").doc(topPostal.id).update({ level: 2 });
-          await db.collection("users").doc(cityUser.id).update({ level: 1 });
-        }
-      } else if (topPostal.weekly_vote === cityUser.weekly_vote) {
-        console.log(`⚖️ Postal vs City tie in state: ${topPostal.stateID}`);
-      }
-    } else {
-      if (isEmulator) {
-        console.log(
-          `📈 Postal→City: ${topPostal.id} (votes: ${topPostal.weekly_vote}, from state: ${topPostal.stateID}, postal: ${topPostal.postalID}) promoted (no competitor)`
-        );
-      } else {
-        await db.collection("users").doc(topPostal.id).update({ level: 2 });
-      }
-    }
-  }
-
-  */
-/* ========== 2. City → State ========== *//*
-
-  const cityGroups = {};
-  allUsers.forEach(u => {
-    if (u.level === 2) {
-      if (!cityGroups[u.cityID]) cityGroups[u.cityID] = [];
-      cityGroups[u.cityID].push(u);
-    }
-  });
-
-  for (const [cityId, users] of Object.entries(cityGroups)) {
-    const topCity = getTopUser(users);
-    if (!topCity) continue;
-
-    const stateUser = allUsers.find(u =>
-      u.level === 3 &&
-      u.stateID === topCity.stateID &&
-      u.cityID === cityId
-    );
-
-    if (stateUser) {
-      if (topCity.weekly_vote > stateUser.weekly_vote) {
-        if (isEmulator) {
-          console.log(
-            `🏆 City→State: ${topCity.id} (votes: ${topCity.weekly_vote}, from state: ${topCity.stateID}, city: ${topCity.cityID}) promoted, ` +
-            `${stateUser.id} (votes: ${stateUser.weekly_vote}, from state: ${stateUser.stateID}, city: ${stateUser.cityID}) demoted`
-          );
-        } else {
-          await db.collection("users").doc(topCity.id).update({ level: 3 });
-          await db.collection("users").doc(stateUser.id).update({ level: 2 });
-        }
-      } else if (topCity.weekly_vote === stateUser.weekly_vote) {
-        console.log(`⚖️ City vs State tie in state: ${topCity.stateID}`);
-      }
-    } else {
-      if (isEmulator) {
-        console.log(
-          `📈 City→State: ${topCity.id} (votes: ${topCity.weekly_vote}, from state: ${topCity.stateID}, city: ${topCity.cityID}) promoted (no competitor)`
-        );
-      } else {
-        await db.collection("users").doc(topCity.id).update({ level: 3 });
-      }
-    }
-  }
-
-  */
-/* ========== 3. State → National ========== *//*
-
-  const stateGroups = {};
-  allUsers.forEach(u => {
-    // sirf state-level users ko group karo
-    if (u.level === 3) {
-      if (!stateGroups[u.stateID]) stateGroups[u.stateID] = [];
-      stateGroups[u.stateID].push(u);
-    }
-  });
-
-  for (const [stateId, users] of Object.entries(stateGroups)) {
-    // top 2 state users
-    const topStateUsers = users
-      .sort((a, b) => b.weekly_vote - a.weekly_vote)
-      .slice(0, 2);
-
-    // usi state ke national users bhi le aao
-    const nationalUsers = allUsers
-      .filter(u => u.level === 4 && u.stateID === stateId)
-      .sort((a, b) => b.weekly_vote - a.weekly_vote)
-      .slice(0, 2);
-
-    // dono milke pool banayenge
-    const pool = [...topStateUsers, ...nationalUsers];
-    if (pool.length === 0) continue;
-
-    // final state ke TOP2 (chahe wo pehle state ho ya national)
-    const finalTop2 = pool.sort((a, b) => b.weekly_vote - a.weekly_vote).slice(0, 2);
-    if (finalTop2.length === 2 && finalTop2[0].weekly_vote === finalTop2[1].weekly_vote) {
-        console.log(`⚖️ Tie detected in State→National for state: ${stateId}, no changes applied`);
-        for (const u of pool) {
-          console.log(`ℹ️ Tie → ${u.id} (votes: ${u.weekly_vote}, state: ${u.stateID}) remains at level ${u.level}`);
-        }
-        continue; // skip promotions/demotions for this state
-      }
-
-    for (const u of pool) {
-      const newLevel = finalTop2.some(t => t.id === u.id) ? 4 : 3;
-
-      if (u.level !== newLevel) {
-        // level change hua
-        if (isEmulator) {
-          if (newLevel === 4) {
-            console.log(`🌍 State→National: ${u.id} (votes: ${u.weekly_vote}, from state: ${u.stateID}) promoted to National`);
-          } else {
-            console.log(`⬇️ National→State: ${u.id} (votes: ${u.weekly_vote}, from state: ${u.stateID}) demoted to State`);
-          }
-        } else {
-          await db.collection("users").doc(u.id).update({ level: newLevel });
-        }
-      } else {
-        // level same hai → log for clarity
-        if (newLevel === 4) {
-          console.log(`✅ Still National: ${u.id} (votes: ${u.weekly_vote}, from state: ${u.stateID}) remains National`);
-        } else {
-          console.log(`ℹ️ Still State: ${u.id} (votes: ${u.weekly_vote}, from state: ${u.stateID}) remains State`);
-        }
-      }
-    }
-  }
-
-
-  console.log("✅ Promotion cycle completed.");
-  return res.send("done");
-});
-*/
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Update user level on every week
 /*exports.sendToNextLevel = functions.runWith({ timeoutSeconds: 540, memory: '2GB' }).https.onRequest(async (req, res) => {
@@ -3820,14 +3633,29 @@ exports.sendToNextLevel = functions
 
         if (cityUser) {
           if (topPostal.weekly_vote > cityUser.weekly_vote) {
+            const userRef = db.collection("users").doc(cityUser.id);
             console.log(`🏆 Postal→City: ${topPostal.id} promoted, ${cityUser.id} demoted`);
-            batch.update(db.collection("users").doc(topPostal.id), { level: 2 });
-            batch.update(db.collection("users").doc(cityUser.id), { level: 1 });
 
-            allUsers = allUsers.map(u =>
-              u.id === topPostal.id ? { ...u, level: 2 } :
-              u.id === cityUser.id ? { ...u, level: 1 } : u
-            );
+            batch.update(db.collection("users").doc(topPostal.id), { level: 2 });
+            batch.update(userRef, { level: 1 });
+
+            if (
+              cityUser.hasOwnProperty("preferred_election_location") &&
+              cityUser.preferred_election_location !== null &&
+              cityUser.preferred_election_location !== "" &&
+              !(typeof cityUser.preferred_election_location === "object" &&
+                Object.keys(cityUser.preferred_election_location).length === 0)
+            ) {
+              batch.update(userRef, {
+                preferred_election_location: {
+                  id: cityUser.postal?.id ?? '',
+                  name: cityUser.postal?.name ?? '',
+                  text: cityUser.postal?.text ?? ''
+                }
+              });
+            } else {
+              console.log(`Skipping user ${cityUser.id} — preferred_election_location missing/null/empty`);
+            }
           } else if (topPostal.weekly_vote === cityUser.weekly_vote) {
             console.log("⚖️ Postal vs City tie → no change");
           } else {
@@ -3836,9 +3664,6 @@ exports.sendToNextLevel = functions
         } else {
           console.log(`⬆️ Promoting postal ${topPostal.id} to city`);
           batch.update(db.collection("users").doc(topPostal.id), { level: 2 });
-          allUsers = allUsers.map(u =>
-            u.id === topPostal.id ? { ...u, level: 2 } : u
-          );
         }
 
         await batch.commit();
@@ -3868,14 +3693,28 @@ exports.sendToNextLevel = functions
 
         if (stateUser) {
           if (topCity.weekly_vote > stateUser.weekly_vote) {
+           const userRef = db.collection("users").doc(stateUser.id);
             console.log(`🏆 City→State: ${topCity.id} promoted, ${stateUser.id} demoted`);
             batch.update(db.collection("users").doc(topCity.id), { level: 3 });
             batch.update(db.collection("users").doc(stateUser.id), { level: 2 });
+            if (
+                                        stateUser.hasOwnProperty("preferred_election_location") && // field exists
+                                        stateUser.preferred_election_location !== null && // not null
+                                        stateUser.preferred_election_location !== "" && // not empty string
+                                        !(typeof stateUser.preferred_election_location === "object" && Object.keys(stateUser.preferred_election_location).length === 0) // not empty object
+                                      ) {
+                                        batch.update(userRef, {
+                                          preferred_election_location: {
+                                            id: stateUser.city.id ?? '',
+                                            name: stateUser.city.name ?? '',
+                                            text: stateUser.city.text ?? ''
+                                          }
+                                        });
+                                      } else {
+                                        // Skip or only update level if needed
+                                        console.log(`Skipping user ${stateUser.id} — preferred_election_location missing/null/empty`);
+                                      }
 
-            allUsers = allUsers.map(u =>
-              u.id === topCity.id ? { ...u, level: 3 } :
-              u.id === stateUser.id ? { ...u, level: 2 } : u
-            );
           } else if (topCity.weekly_vote === stateUser.weekly_vote) {
             console.log("⚖️ City vs State tie → no change");
           } else {
@@ -3884,9 +3723,6 @@ exports.sendToNextLevel = functions
         } else {
           console.log(`⬆️ Promoting city ${topCity.id} to state`);
           batch.update(db.collection("users").doc(topCity.id), { level: 3 });
-          allUsers = allUsers.map(u =>
-            u.id === topCity.id ? { ...u, level: 3 } : u
-          );
         }
 
         await batch.commit();
@@ -3918,16 +3754,31 @@ exports.sendToNextLevel = functions
         const batch = db.batch();
 
         for (const u of pool) {
+        const userRef = db.collection("users").doc(u.id);
           const newLevel = winnerSet.has(u.id) ? 4 : 3;
           if (u.level !== newLevel) {
             batch.update(db.collection("users").doc(u.id), { level: newLevel });
             console.log(
               `${newLevel === 4 ? "⬆️ Promoted to National" : "⬇️ Demoted to State"}: ${u.id}`
             );
+            if(newLevel === 3 && u.level === 4){
 
-            allUsers = allUsers.map(user =>
-              user.id === u.id ? { ...user, level: newLevel } : user
-            );
+            if (u.hasOwnProperty("preferred_election_location") && // field exists
+                u.preferred_election_location !== null && // not null
+                u.preferred_election_location !== "" && // not empty string
+                !(typeof u.preferred_election_location === "object" && Object.keys(u.preferred_election_location).length === 0) // not empty object
+                ) {
+                   batch.update(userRef, {
+                   preferred_election_location: {
+                     id: u.state.id ?? '',
+                     name: u.state.name ?? '',
+                     text: u.state.text ?? ''
+                   }
+                });
+                }else {
+                  // Skip or only update level if needed
+                  console.log(`Skipping user ${u.id} — preferred_election_location missing/null/empty`);
+                }
           } else {
             console.log(
               `${newLevel === 4 ? "✅ Still National" : "ℹ️ Still State"}: ${u.id}`
@@ -3935,9 +3786,9 @@ exports.sendToNextLevel = functions
           }
         }
 
-        await batch.commit();
-      }
 
+       }
+       }
       console.log("✅ Promotion cycle completed.");
       res.send("Promotion cycle completed.");
     } catch (e) {
@@ -3947,206 +3798,6 @@ exports.sendToNextLevel = functions
   });
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//migrating to new level upgrade logic
-
-/*async function migrateUserLevelsOnce(allUsers) {
-  let changes = 0;
-console.log("**************************************************************************************");
- *//* ===== 1. Postal → City ===== *//*
-
- const postalGroups = {};
- allUsers.forEach(u => {
-   if (u.level === 1) {
-     if (!postalGroups[u.postal.id]) postalGroups[u.postal.id] = [];
-     postalGroups[u.postal.id].push(u);
-   }
- });
-
- for (const [postalId, users] of Object.entries(postalGroups)) {
-   const topPostal = getTopUser(users);
-   if (!topPostal) continue;
-
-   // Get all City level users for this postal
-   const cityUsers = allUsers.filter(u => u.level === 2 && u.postal.id === postalId);
-   console.log(`${cityUsers.length} city users found for postal ${postalId}`);
-
-   if (cityUsers.length === 0) {
-     // No City users → directly promote postal top user
-     if (topPostal.level !== 2) {
-       await admin.firestore().collection("users").doc(topPostal.id).update({ level: 2 });
-       allUsers = allUsers.map(u => u.id === topPostal.id ? { ...u, level: 2 } : u);
-       changes++;
-     }
-     continue; // move to next postal
-   }
-
-   // Make a pool for Postal + City
-   const cityAndPostalPool = [topPostal, ...cityUsers];
-
-   // Sort by votes and pick top 1
-   const finalTop1CityUser = cityAndPostalPool.sort((a, b) => b.weekly_vote - a.weekly_vote)[0];
-
-   // Loop through pool and assign levels
-   for (const u of cityAndPostalPool) {
-     const newLevel = (u.id === finalTop1CityUser.id) ? 2 : 1;
-
-     if (u.level !== newLevel) {
-       // Update Firestore
-       await admin.firestore().collection("users").doc(u.id).update({ level: newLevel });
-
-       // Update local allUsers list
-       allUsers = allUsers.map(user => user.id === u.id ? { ...user, level: newLevel } : user);
-       changes++
-     }
-   }
- }
-
-
-*//** ===== 2. City → State ===== *//*
-const cityGroups = {};
-allUsers.forEach(u => {
-  if (u.level === 2) {
-    if (!cityGroups[u.city.id]) cityGroups[u.city.id] = [];
-    cityGroups[u.city.id].push(u);
-  }
-});
-
-for (const [cityId, users] of Object.entries(cityGroups)) {
-  const topCity = getTopUser(users);
-  if (!topCity) continue;
-
-  // Get all State-level users in the same city
-  const stateUsers = allUsers.filter(u =>
-    u.level === 3 &&
-    u.state.id === topCity.state.id &&
-    u.city.id === cityId
-  );
-
-  console.log(`${stateUsers.length} state users found for city ${cityId}`);
-
-  if (stateUsers.length === 0) {
-    // No state users → directly promote topCity to level 3
-    if (topCity.level !== 3) {
-      await admin.firestore().collection("users").doc(topCity.id).update({ level: 3 });
-      allUsers = allUsers.map(u => u.id === topCity.id ? { ...u, level: 3 } : u);
-      changes++;
-    }
-    continue;
-  }
-
-  // Make pool = City top + existing State users
-  const stateAndCityPool = [topCity, ...stateUsers];
-
-  // Find final top1 for state
-  const finalTop1StateUser = stateAndCityPool
-    .sort((a, b) => b.weekly_vote - a.weekly_vote)[0];
-
-  // Loop through pool and assign new levels
-  for (const u of stateAndCityPool) {
-    const newLevel = (u.id === finalTop1StateUser.id) ? 3 : 2;
-
-    if (u.level !== newLevel) {
-      await admin.firestore().collection("users").doc(u.id).update({ level: newLevel });
-
-      // Update local cache
-      allUsers = allUsers.map(user =>
-        user.id === u.id ? { ...user, level: newLevel } : user
-      );
-      changes++;
-    }
-  }
-}
-
- *//* ===== 3. State → National ===== *//*
- const stateGroups = {};
- allUsers.forEach(u => {
-   if (u.level === 3) {
-     if (!stateGroups[u.state.id]) stateGroups[u.state.id] = [];
-     stateGroups[u.state.id].push(u);
-   }
- });
-
- for (const [stateId, users] of Object.entries(stateGroups)) {
-   // Top 2 state users
-   const topStateUsers = users.sort((a, b) => b.weekly_vote - a.weekly_vote).slice(0, 2);
-
-   if (topStateUsers.length === 0) continue;
-
-   // National users of this state
-   const nationalUsers = allUsers.filter(u => u.level === 4 && u.state.id === stateId);
-
-   // If no national users → promote both top state users
-   if (nationalUsers.length === 0) {
-     for (const sUser of topStateUsers) {
-       if (sUser.level !== 4) {
-         await admin.firestore().collection("users").doc(sUser.id).update({ level: 4 });
-         allUsers = allUsers.map(u =>
-           u.id === sUser.id ? { ...u, level: 4 } : u
-         );
-         changes++;
-         console.log(`Promoted State ${sUser.id} → National`);
-       }
-     }
-     continue;
-   }
-    const stateNationPool = [...topStateUsers, ...nationalUsers];
-    const winners = stateNationPool
-      .sort((a, b) =>
-        b.weekly_vote - a.weekly_vote ||
-        b.level - a.level
-      )
-      .slice(0, 2);
-
-    const winnerSet = new Set(winners.map(u => u.id));
-
-    for (const u of stateNationPool) {
-      const newLevel = winnerSet.has(u.id) ? 4 : 3;
-      if (u.level !== newLevel) {
-          await admin.firestore().collection("users").doc(u.id).update({ level: newLevel });
-      } else {
-      // If no changes in user level
-        if (newLevel === 4) {
-           console.log(`✅ Still National: ${u.id} (votes: ${u.weekly_vote}, from state: ${u.state.id}) remains National`);
-        } else {
-           console.log(`ℹ️ Still State: ${u.id} (votes: ${u.weekly_vote}, from state: ${u.state.id}) remains State`);
-        }
-      }
-        changes++;
-        console.log(`${newLevel === 4 ? "Promoted" : "Demoted"} ${u.id} → ${newLevel === 4 ? "National" : "State"} (state ${stateId})`);
-      }
- }
-return { changes, allUsers };
-}
-
-
-*//**
- * Auto-loop until no changes occur
- *//*
-exports.migrateUserlevel = functions.runWith({ timeoutSeconds: 540, memory: '2GB' }).https.onRequest(async (req, res) => {
-  try{
-  console.log("🚀 Starting auto-loop migration...");
-    let snapshot = await admin.firestore().collection("users").get();
-    console.log("pdskojd");
-    let allUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    let iteration = 0;
-    let changes = 1;
-
-    while (changes > 0 && iteration < 5) {
-      iteration++;
-      console.log(`\n🔄 Migration run #${iteration}`);
-      const result = await migrateUserLevelsOnce(allUsers);
-      changes = result.changes;
-      allUsers = result.allUsers;
-      console.log(`Changes in this run: ${changes}`);
-    }
-
-    console.log("✅ All users settled in their deserved levels!");
-
-  }catch{
-   console.log("Fiald to reset levels");
-  }
-});*/
 async function  migrateUserLevelsOnce(allUsers) {
   let changes = 0;
   const db = admin.firestore();
@@ -4294,7 +3945,6 @@ exports.migrateUserlevel = functions
   });
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 //async function migrateUserLevelsOnce(allUsers) {
 //  let changes = 0;
 //

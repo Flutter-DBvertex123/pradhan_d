@@ -123,6 +123,9 @@ class CreatePostController extends GetxController {
     };
 
     final levelCode = levelNameToCode[levelKey] ?? 0;
+    if (userLevel < levelCode) {
+      return false;
+    }
 
     // Allow unlimited posts if user is Pradhaan at this level
     if (pradhanLevel == levelCode) return true;

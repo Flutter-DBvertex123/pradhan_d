@@ -14,7 +14,7 @@ db.settings({
 });
 
 // Load JSON file
-const data = JSON.parse(fs.readFileSync("./functions/expanded_users_5000.json", "utf8"));
+const data = JSON.parse(fs.readFileSync("./functions/users.json", "utf8"));
 
 async function seed() {
   for (const user of data) {

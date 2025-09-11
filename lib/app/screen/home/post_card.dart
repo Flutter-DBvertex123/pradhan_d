@@ -549,25 +549,28 @@ if(userModel ==null){
                                     children: [
                                       Row(
                                         children: [
-                                          Text(
+                                          ConstrainedBox(
+                                            constraints: BoxConstraints(maxWidth: 250),
+                                            child: Text(
 
-                                            userModel!.isOrganization &&
-                                                widget.postModel.posterId !=null &&
-                                                widget.postModel.posterId!.isNotEmpty
-                                            // ?"${userModel!.name}  Posted by  ${posterModel?.name??"Unknown"}"
-                                            ?"${userModel!.name}  ➣  ${posterModel?.name??"Unknown"}"
-                                            :userModel!.name,
-                                            textAlign: TextAlign.left,
-                                            style: TextStyle(
-                                                color:
-                                                    Color.fromRGBO(
-                                                            0, 0, 0, 1),
-                                                fontFamily: 'Montserrat',
-                                                fontSize: 12,
-                                                letterSpacing:
-                                                    0 /*percentages not used in flutter. defaulting to zero*/,
-                                                fontWeight: FontWeight.normal,
-                                                height: 1),
+                                              userModel!.isOrganization &&
+                                                  widget.postModel.posterId !=null &&
+                                                  widget.postModel.posterId!.isNotEmpty
+                                              // ?"${userModel!.name}  Posted by  ${posterModel?.name??"Unknown"}"
+                                              ?"${userModel!.name}  ➣  ${posterModel?.name??"Unknown"}"
+                                              :userModel!.name,
+                                              textAlign: TextAlign.left,
+                                              style: TextStyle(
+                                                  color:
+                                                      Color.fromRGBO(
+                                                              0, 0, 0, 1),
+                                                  fontFamily: 'Montserrat',
+                                                  fontSize: 12,
+                                                  letterSpacing:
+                                                      0 /*percentages not used in flutter. defaulting to zero*/,
+                                                  fontWeight: FontWeight.normal,
+                                                  height: 1),
+                                            ),
                                           ),
                                           SizedBox(
                                             width: 5.w,

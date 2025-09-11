@@ -87,6 +87,7 @@ class HomeController extends GetxController {
     if (index % 5 == 0 && index > adList.length /*&& AdsFetcher().getRandomDouble() > 0.1*/) {
       try {
         ad = await AdsFetcher().getRandomAd();
+        print("dsssss : $ad");
       } catch (er) {
         print("ishwar: skipped at: $er");
       }
@@ -336,6 +337,7 @@ class HomeController extends GetxController {
                 // valid documents are only the once where show_level doesn't contain level 1
                 if (!post.showlevel.contains(1)) {
                   postList.add(post);
+                  print('calling get add function');
                   await addAdvertisement();
                   validDocumentsCount++;
                 }

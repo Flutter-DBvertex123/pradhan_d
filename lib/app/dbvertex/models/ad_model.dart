@@ -96,7 +96,8 @@ class AdModel {
       targetViews: json['target_views'] ?? 0,
       paymentId: json['payment_id'] ?? 'none',
       randomness: json['randomness'] ?? 0.0,
-      priority: json['priority'] ?? 0.0,
+      //priority: json['priority'] ?? 0.0,
+        priority: json['priority'].toDouble() ?? '',
       scopeSuffix: json['scope_suffix']
     );
   }
